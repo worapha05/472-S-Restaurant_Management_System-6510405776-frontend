@@ -3,7 +3,7 @@
 ## Clone the project
 
 ```bash
-git clone XX
+git clone https://github.com/Professors001/omnidine-frontend
 cd omnidine-frontend
 ```
 
