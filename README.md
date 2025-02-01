@@ -30,3 +30,5 @@ docker compose up -d
 ### http://localhost:7070/
 
 ### http://localhost:7070/hello
+
+### http://localhost:7070/api
