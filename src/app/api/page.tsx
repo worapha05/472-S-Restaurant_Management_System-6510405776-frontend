@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 
 const ApiTest = () => {
   const [apiData, setApiData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,10 +18,13 @@ const ApiTest = () => {
         setApiData(data);
         setLoading(false);
       } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+        };
+    }
 
     fetchData();
   }, []);
