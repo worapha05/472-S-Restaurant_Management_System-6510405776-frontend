@@ -10,7 +10,7 @@ const ApiTest = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost/api');
+        const response = await fetch('http://localhost/api/orders');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -44,9 +44,9 @@ const ApiTest = () => {
       )}
 
       {apiData && (
-        <div className="p-4 bg-green-100 rounded-md">
+        <div className="p-4 bg-green-600 rounded-md">
           <h2 className="font-semibold mb-2">API Response:</h2>
-          <pre className="bg-white p-4 rounded-md shadow">
+          <pre className="bg-black p-4 rounded-md shadow text-white">
             {JSON.stringify(apiData, null, 2)}
           </pre>
         </div>
