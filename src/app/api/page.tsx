@@ -10,7 +10,7 @@ const ApiTest = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost/api/orders');
+        const response = await fetch('http://localhost/api/orders/2');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

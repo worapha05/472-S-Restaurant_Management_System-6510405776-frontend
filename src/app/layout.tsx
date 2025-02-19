@@ -20,8 +20,8 @@ const notoSansThai = Noto_Sans_Thai({
 });
 
 export const metadata: Metadata = {
-  title: "My Next.js App",
-  description: "A Next.js app with Noto Sans Thai font",
+  title: "Omnidine",
+  description: "Omnidine",
 };
 
 export default function RootLayout({
