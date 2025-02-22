@@ -27,7 +27,7 @@ export default function OrderCard({ order }: { order: Order }) {
         
             <div className="px-6 py-8 w-full rounded-xl shadow-lg border border-primary hover:scale-105 hover:shadow-xl">
                 {/* Header with Status and Type */}
-                <div className="px-6 py-4 flex justify-between items-center">
+                <div className="px-6 py-1 flex justify-between items-center">
                     <div className={`px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {order.status}
                     </div>
@@ -36,7 +36,7 @@ export default function OrderCard({ order }: { order: Order }) {
                     </div>
                 </div>
 
-                <div className="px-6 py-4 flex justify-between items-center">
+                <div className="px-6 py-1 flex justify-between items-center">
                     
                     <div className="flex flex-col gap-2 text-mainText">
                         <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export default function OrderCard({ order }: { order: Order }) {
 
                 </div>
 
-                <div className="px-6 py-4 flex justify-between items-center">
+                <div className="px-6 py-1 flex justify-between items-center">
                     
                     <div className="flex items-center gap-2">
 

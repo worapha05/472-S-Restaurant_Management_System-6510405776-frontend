@@ -13,7 +13,7 @@ async function getData() {
     
     const resJson = await res.json();
     console.log("Fetched Data:", resJson); // Logs the response JSON
-    return resJson.data;
+    return resJson.data || [];
 }
 
 export default async function OrdersPage() {
