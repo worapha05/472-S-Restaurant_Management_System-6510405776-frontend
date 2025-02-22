@@ -2,8 +2,12 @@
 interface OrderListItem {
     id: number;
     description: string;
-    price: number;
     quantity: number;
+    food: {
+        name: string;
+        image_url: string;
+        price: number;
+    };
 }
 
 export default function OrderListCard({ item }: { item: OrderListItem }) {
@@ -16,12 +20,12 @@ export default function OrderListCard({ item }: { item: OrderListItem }) {
             {/* food details */}
             <div className="flex justify-between gap-4">
                 <div className="flex flex-col gap-2 flex-1">
-                    <p className="font-bold text-xl">{item.id}</p>
+                    <p className="font-bold text-xl">{item.food.name}</p>
                     <p>{item.description}</p>
                 </div>
 
                 <div className="flex flex-col items-end justify-end">
-                    <p>${item.price}</p>
+                    <p>${item.food.price}</p>
                 </div>
             </div>
 

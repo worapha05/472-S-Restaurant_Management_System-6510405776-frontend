@@ -1,6 +1,5 @@
 'use client';
 
-
 export default function SummaryOrderCard({ totalPrice, fee }: { totalPrice: number, fee: number}) {
     return (
         <div className="flex flex-col rounded-2xl p-6 w-full shadow-xl gap-4 border-2 border-primary">
