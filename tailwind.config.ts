@@ -25,7 +25,7 @@ export default {
         searchBox: "#F2F2F2",
         boldTextHighlights: "#000000",
         cancelRed: "#A91D3A",
-        hoverCancelRed: "#B22222",
+        hoverCancel: "#B22222",
         acceptGreen: "#1DA936",
         hoverAccept: "#264653",
         inputFieldFocus: "#4E54E7",

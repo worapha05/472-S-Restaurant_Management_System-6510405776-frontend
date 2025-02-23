@@ -19,7 +19,9 @@ export default async function ReservationPage({ params }: { params: { time: stri
     return (
         <div className="flex flex-col items-center justify-center w-full">
             <div className="py-12 flex flex-col items-center justify-center max-w-5xl gap-6">
-                <p className="text-xl">เวลาที่ท่านเลือกจองคือ {params.time}:00</p>
+                <p className="text-xl">เวลาที่ท่านเลือกจองคือ  
+                    <span className="font-bold"> {params.time}:00</span>
+                </p>
 
                 <div className="flex flex-wrap gap-4 w-full max-w-5xl rounded-lg
                                 items-center justify-center">

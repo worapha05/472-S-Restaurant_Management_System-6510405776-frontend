@@ -3,20 +3,26 @@
 async function makeReservation({ id, time }: { id: string; time: string }) {
     try {
         const currentDate = new Date().toISOString().split("T")[0];
-        const appointmentTime = `${currentDate}T${String(Number(time) + 2).padStart(2, "0")}:00:00`;
+        const appointmentTime = `${currentDate}T${String(Number(time)).padStart(2, "0")}:00:00`;
 
         const body = {
             user_id: 1, // TO DO: Get UID From Token Login User
             table_id: id,
             appointment_time: appointmentTime,
         };
-
+        
         const res = await fetch("http://localhost/api/reservations", {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(body),
         });
 
         if (!res.ok) {
+            // Log the error response
+            const errorText = await res.text();
+            console.error('Server error response:', errorText);
             throw new Error(`HTTP error! status: ${res.status}`);
         }
 
