@@ -11,11 +11,8 @@ RUN bun install
 # Copy the rest of the application
 COPY . .
 
-# Build the Next.js application
-RUN bun run build
-
 # Expose port 3000
 EXPOSE 3000
 
-# Start the application
+# Start the application in development mode
 CMD ["bun", "run", "dev"]
