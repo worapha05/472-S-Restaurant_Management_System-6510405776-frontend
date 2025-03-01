@@ -1,7 +1,7 @@
 import Table from "@/components/Reservation/TableCard";
 
 async function getData() {
-    const res = await fetch("http://omnidine-backend-laravel.test-1/api/tables");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tables`);
 
     if (!res.ok) {
         throw new Error('Failed to fetch data');

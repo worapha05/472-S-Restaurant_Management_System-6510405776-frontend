@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from "react";
+
 interface Reservation {
     appointment_time: string;
     date: string;
@@ -10,7 +12,7 @@ interface Reservation {
     user_id: string;
 }
 
-async function chageReservationStatus({ id, status }: { id: string; status: string }) {
+async function changeReservationStatus({ id, status }: { id: string; status: string }) {
     try {
         const body = {
             status: status
@@ -32,7 +34,9 @@ async function chageReservationStatus({ id, status }: { id: string; status: stri
         }
 
         alert(`Changeed Reservation Status confirmed for Table ${id} to ${status}`);
-        return await res.json();
+
+        const resJson = await res.json();
+        return resJson.data;
         
     } catch (error) {
         console.error('Reservation error:', error);
@@ -40,52 +44,47 @@ async function chageReservationStatus({ id, status }: { id: string; status: stri
     }
 }
 
-export default function ReservationCard({ reservation }: { reservation: Reservation }) {
-
-    const getStatusColor = (status: string): string => {
-        switch (status.toLowerCase()) {
-            case 'pending': return 'bg-yellow-500 text-white';
-            case 'confirmed': return 'bg-green-500 text-white';
-            case 'cancelled': return 'bg-red-500 text-white';
-            default: return 'bg-gray-500 text-white';
-        }
-    };
-
-    // Format the time for better UX/UI
-    function formatUserFriendlyTime(datetime: string): string {
-        const date = new Date(datetime.replace(" ", "T")); // Ensure proper Date conversion
-
-        return date.toLocaleString("th-TH", {
-            weekday: "long",  // พฤหัสบดี
-            year: "numeric",  // 2025
-            month: "long",    // กุมภาพันธ์
-            day: "2-digit",   // 20
-            hour: "2-digit",  // 10 AM
-            minute: "2-digit",
-        });
+const getStatusColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+        case 'pending': return 'bg-yellow-500 text-white';
+        case 'confirmed': return 'bg-green-500 text-white';
+        case 'cancelled': return 'bg-red-500 text-white';
+        default: return 'bg-gray-500 text-white';
     }
+};
 
-    // function formatUserFriendlyTime(datetime: string): string {
-    //     const date = new Date(datetime);  
-    //     date.setHours(date.getHours() + 7); // Adjust to UTC+7
-    
-    //     return date.toLocaleString("th-TH", {
-    //         weekday: "long",  // วันอาทิตย์
-    //         day: "numeric",   // 23
-    //         month: "long",    // กุมภาพันธ์
-    //         year: "numeric",  // 2025
-    //         hour: "2-digit",  // 18
-    //         minute: "2-digit",
-    //         hour12: true,     // แสดง AM/PM
-    //     });
-    // }
+// Format the time for better UX/UI
+function formatUserFriendlyTime(datetime: string): string {
+    const date = new Date(datetime.replace(" ", "T")); // Ensure proper Date conversion
+
+    return date.toLocaleString("th-TH", {
+        weekday: "long",  // พฤหัสบดี
+        year: "numeric",  // 2025
+        month: "long",    // กุมภาพันธ์
+        day: "2-digit",   // 20
+        hour: "2-digit",  // 10 AM
+        minute: "2-digit",
+    });
+}
+
+export default function ReservationCard({ reservation }: { reservation: Reservation }) {
+    const [currentStatus, setCurrentStatus] = useState(reservation.status);
 
     const handleStatusChange = async (status: string) => {
-        const confirmMessage = status === "CONFIRMED" ? "คุณแน่ใจหรือไม่ว่าต้องการอนุมัติการจองนี้?" : "คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธการจองนี้?";
+        const confirmMessage = status === "CONFIRMED" 
+            ? "คุณแน่ใจหรือไม่ว่าต้องการอนุมัติการจองนี้?" 
+            : "คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธการจองนี้?";
         
         if (window.confirm(confirmMessage)) {
-            await chageReservationStatus({ id: reservation.id, status });
-            // Optional: Add state management or refresh logic here
+            const updatedReservation = await changeReservationStatus({ id: reservation.id, status });
+
+            if (updatedReservation) {
+                
+                // console.log("---------------------");
+                // console.log(updatedReservation.status);
+                
+                setCurrentStatus(updatedReservation.status); // Update UI instantly
+            }
         }
     };
 
@@ -93,8 +92,8 @@ export default function ReservationCard({ reservation }: { reservation: Reservat
         <div className="px-6 py-8 w-full rounded-xl shadow-lg border border-primary hover:scale-105 hover:shadow-xl">
             {/* Header with Status and Type */}
             <div className="px-6 py-1 flex justify-between items-center">
-                <div className={`px-3 py-1 rounded-full ${getStatusColor(reservation.status)}`}>
-                    {reservation.status}
+                <div className={`px-3 py-1 rounded-full ${getStatusColor(currentStatus)}`}>
+                    {currentStatus}
                 </div>
                 <div className="px-3 py-1 rounded-full font-bold breservation breservation-primary">
                     โต๊ะที่: {reservation.table_id}
