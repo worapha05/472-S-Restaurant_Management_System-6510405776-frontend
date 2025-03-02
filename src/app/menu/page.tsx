@@ -1,6 +1,7 @@
 // app/menu/page.tsx
 import Navbar from "@/components/Navbar/Navbar";
 import MenuCard from "@/components/Menu/MenuCard";
+import Link from "next/link";
 
 async function getData() {
     const res = await fetch("http://omnidine-backend-laravel.test-1/api/foods");
@@ -21,7 +22,16 @@ export default async function MenuPage() {
         <>
             <Navbar />
             <div className="flex flex-col items-center justify-center w-full px-4">
-                <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
+                <div className="flex items-center justify-between w-full max-w-5xl">
+                    <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
+
+                    <Link 
+                        href="/cart" 
+                        className="flex items-center justify-center p-2 rounded-xl bg-primary hover:bg-primary-dark transition-colors"
+                    >
+                        <p className="font-bold text-white w-full text-center no-wrap">ตะกร้าสินค้า</p>
+                    </Link>
+                </div>
 
                 {/* Category Navigation */}
                 <div className="w-full max-w-5xl mb-8">
@@ -41,12 +51,7 @@ export default async function MenuPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
                     {menuItems.map((menu: any) => (
                         <MenuCard
-                            key={menu.id}
-                            title={menu.name}
-                            description={menu.description}
-                            imageUrl={menu.image_url}
-                            category={menu.category}
-                            price={menu.price}
+                            menu={menu}
                         />
                     ))}
                 </div>
