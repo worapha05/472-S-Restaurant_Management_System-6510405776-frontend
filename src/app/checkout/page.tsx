@@ -111,7 +111,7 @@ export default function CheckoutPage() {
                     </button>
                 </div>
 
-                <p className="font-bold text-3xl w-full max-w-5xl">ตะกร้าสินค้า</p>
+                <p className="font-bold text-3xl w-full max-w-5xl">รูปแบบของการสั่งซื้อ</p>
 
                 <div className="flex items-start justify-center gap-12 w-full max-w-5xl">
                     <div className="flex flex-col gap-4 w-5/6">
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
 
                     <div className="flex flex-col gap-4 w-2/5">
                         <div className="flex flex-col rounded-2xl p-6 w-full shadow-xl gap-4 border-2 border-primary">
-                            <p className="font-bold text-2xl">สรุปค่าใช้จ่าย</p>
+                            <p className="font-bold text-2xl">วิธีการชำระเงิน</p>
                             {paymentMethods.map((method) => (
                                 <div 
                                     key={method.id}

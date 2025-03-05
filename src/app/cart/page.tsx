@@ -77,7 +77,7 @@ export default function CartPage() {
             0
         );
         
-        const serviceFee = Math.round((total * 0.1) * 100) / 100;
+        const serviceFee = 0;
         
         setTotalPrice(total);
         setFee(serviceFee);
