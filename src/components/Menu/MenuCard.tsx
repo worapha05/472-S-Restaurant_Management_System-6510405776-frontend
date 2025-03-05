@@ -31,7 +31,7 @@ const MenuCard = ({ menu }: {menu : Menu}) => {
         } else {
             cart.push({
                 food: menu,
-                description: "Test",
+                description: "",
                 quantity: 1
             })
         }
