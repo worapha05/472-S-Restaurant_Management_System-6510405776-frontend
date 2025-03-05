@@ -11,6 +11,8 @@ export default function ShowTimeSlots() {
     const [table_id, setTable_id] = useState<string>("");
     const [tables, setTables] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [dateError, setDateError] = useState<string>("");
+    const [timeError, setTimeError] = useState<string>("");
     const [completedSteps, setCompletedSteps] = useState({
         date: false,
         time: false,
@@ -42,14 +44,79 @@ export default function ShowTimeSlots() {
         fetchData();
     }, []);
 
+    const validateDate = (selectedDate: Date): boolean => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const maxDate = new Date();
+        maxDate.setFullYear(maxDate.getFullYear() + 1);
+
+        if (selectedDate <= today) {
+            setDateError("กรุณาเลือกวันที่ในอนาคต");
+            return false;
+        }
+
+        if (selectedDate > maxDate) {
+            setDateError("ไม่สามารถจองล่วงหน้าเกิน 1 ปีได้");
+            return false;
+        }
+
+        setDateError("");
+        return true;
+    };
+
+    const validateTime = (selectedTime: string, selectedDate: Date | null): boolean => {
+        const currentDate = new Date();
+        const currentHour = currentDate.getHours();
+
+        // If selected date is today, validate time
+        if (selectedDate && 
+            selectedDate.toDateString() === currentDate.toDateString()) {
+            const selectedHour = Number(selectedTime);
+
+            // Ensure selected time is in the future
+            if (selectedHour <= currentHour) {
+                setTimeError("กรุณาเลือกเวลาในอนาคต");
+                return false;
+            }
+        }
+
+        // Restaurant operating hours (assuming 10:00 - 20:00)
+        const selectedHour = Number(selectedTime);
+        if (selectedHour < 10 || selectedHour > 20) {
+            setTimeError("กรุณาเลือกเวลาระหว่าง 10:00 - 20:00");
+            return false;
+        }
+
+        setTimeError("");
+        return true;
+    };
+
     const handleDateSelect = (selectedDate: Date) => {
-        setDate(selectedDate);
-        setCompletedSteps(prev => ({...prev, date: true}));
+        if (validateDate(selectedDate)) {
+            setDate(selectedDate);
+            setCompletedSteps(prev => ({...prev, date: true}));
+            
+            // Reset subsequent steps
+            setTime("");
+            setTable_id("");
+            setCompletedSteps(prev => ({
+                ...prev, 
+                time: false, 
+                table: false
+            }));
+        }
     };
 
     const handleTimeSelect = (selectedTime: string) => {
-        setTime(selectedTime);
-        setCompletedSteps(prev => ({...prev, time: true}));
+        if (validateTime(selectedTime, date)) {
+            setTime(selectedTime);
+            setCompletedSteps(prev => ({...prev, time: true}));
+            
+            // Reset table selection
+            setTable_id("");
+            setCompletedSteps(prev => ({...prev, table: false}));
+        }
     };
 
     const handleTableSelect = (selectedTableId: string) => {
@@ -123,20 +190,27 @@ export default function ShowTimeSlots() {
                         <h2 className="text-2xl font-bold mb-4">
                             1. เลือกวันที่ต้องการจอง
                         </h2>
+
                         <div className="flex items-center justify-center">
                             <input 
                                 type="date" 
                                 value={date ? date.toISOString().split('T')[0] : ''} 
                                 onChange={(e) => handleDateSelect(new Date(e.target.value))}
+                                min={new Date().toISOString().split('T')[0]}
                                 className="w-full max-w-md p-2 border rounded-lg"
                             />
+                            {dateError && (
+                                <p className="text-red-500 mt-2">
+                                    {dateError}
+                                </p>
+                            )}
                         </div>
                     </div>
 
                     {/* Time Selection */}
                     <div className={`
                         border-2 rounded-xl p-6 
-                        ${completedSteps.date ? 'opacity-100' : 'opacity-50 pointer-events-none'}
+                        ${completedSteps.date ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                         ${completedSteps.time ? 'border-green-500' : 'border-gray-300'}
                     `}>
                         <h2 className="text-2xl font-bold mb-4">
@@ -149,25 +223,34 @@ export default function ShowTimeSlots() {
                                     onClick={() => handleTimeSelect((10 + i).toString())}
                                     className={`
                                         cursor-pointer 
-                                        ${time === (10 + i).toString() ? 'bg-black text-white' : 'bg-gray-100'}
-                                        rounded-xl p-2
+                                        ${time === (10 + i).toString() ? 'bg-black text-white' : 'hover:scale-105'}
+                                        rounded-xl
                                     `}
                                 >
                                     <TimeCard time={(10 + i).toString()} />
                                 </div>
                             ))}
                         </div>
+
+                        <div>
+                            {timeError && (
+                                <p className="text-red-500 mt-2 text-center">
+                                    {timeError}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Table Selection */}
                     <div className={`
                         border-2 rounded-xl p-6 
-                        ${completedSteps.time ? 'opacity-100' : 'opacity-50 pointer-events-none'}
+                        ${completedSteps.time ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                         ${completedSteps.table ? 'border-green-500' : 'border-gray-300'}
                     `}>
                         <h2 className="text-2xl font-bold mb-4">
                             3. เลือกโต๊ะ
                         </h2>
+
                         <div className="flex flex-wrap gap-4 justify-center">
                             {tables.map((table: any) => (
                                 <div
@@ -175,7 +258,7 @@ export default function ShowTimeSlots() {
                                     onClick={() => handleTableSelect(table.id.toString())}
                                     className={`
                                         cursor-pointer 
-                                        ${table_id === table.id.toString() ? 'bg-black text-white' : 'bg-gray-100'}
+                                        ${table_id === table.id.toString() ? 'bg-black text-white' : 'hover:scale-105'}
                                         rounded-xl
                                     `}
                                 >
@@ -188,7 +271,7 @@ export default function ShowTimeSlots() {
                     {/* Reservation Confirmation */}
                     <div className={`
                         border-2 rounded-xl p-6 
-                        ${completedSteps.table ? 'opacity-100' : 'opacity-50 pointer-events-none'}
+                        ${completedSteps.table ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                     `}>
                         <h2 className="text-2xl font-bold mb-4">
                             4. ยืนยันการจอง
