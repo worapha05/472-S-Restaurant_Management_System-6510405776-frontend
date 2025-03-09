@@ -184,23 +184,23 @@ export default function ShowTimeSlots() {
                 <>
                     {/* Date Selection */}
                     <div className={`
-                        border-2 rounded-xl p-6 
+                        border-2 rounded-xl p-6 flex items-center justify-between w-full
                         ${completedSteps.date ? 'border-green-500' : 'border-gray-300'}
                     `}>
-                        <h2 className="text-2xl font-bold mb-4">
-                            1. เลือกวันที่ต้องการจอง
-                        </h2>
+                        <div className="text-2xl font-bold w-1/2 text-left">
+                            <p>1. เลือกวันที่ต้องการจอง</p>
+                        </div>
 
-                        <div className="flex items-center justify-center">
+                        <div className="flex flex-col items-end w-1/4">
                             <input 
                                 type="date" 
                                 value={date ? date.toISOString().split('T')[0] : ''} 
                                 onChange={(e) => handleDateSelect(new Date(e.target.value))}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full max-w-md p-2 border rounded-lg"
+                                className="w-full max-w-md px-2 py-4 border rounded-lg text-center"
                             />
                             {dateError && (
-                                <p className="text-red-500 mt-2">
+                                <p className="text-red-500 mt-2 text-sm">
                                     {dateError}
                                 </p>
                             )}
