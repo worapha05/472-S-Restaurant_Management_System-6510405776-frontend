@@ -61,19 +61,6 @@ export default function HelloPage(): JSX.Element {
       </div>
 
       <div>
-        <input 
-          onChange={handleFileChange}
-          type='file'
-        />
-        <button 
-          onClick={handleUpload}
-          className='bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded'
-        >
-          Upload Image
-        </button>
-      </div>
-
-      <div>
         {!imageError ? (
           <img 
             src={imageUrl} 
