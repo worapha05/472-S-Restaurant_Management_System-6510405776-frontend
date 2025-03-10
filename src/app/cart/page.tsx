@@ -35,10 +35,6 @@ export default function CartPage() {
         const loadCart = async () => {
             try {
                 setIsLoading(true);
-                
-                // Simulate network delay (remove in production)
-                // await new Promise(resolve => setTimeout(resolve, 500));
-                
                 const cartData = localStorage.getItem("cart");
                 const parsedCart = cartData ? JSON.parse(cartData) : [];
                 setCart(parsedCart);
@@ -77,7 +73,7 @@ export default function CartPage() {
             0
         );
         
-        const serviceFee = Math.round((total * 0.1) * 100) / 100;
+        const serviceFee = 0;
         
         setTotalPrice(total);
         setFee(serviceFee);
@@ -87,10 +83,6 @@ export default function CartPage() {
     const handleCartUpdate = async () => {
         try {
             setIsUpdating(true);
-            
-            // Simulate network delay (remove in production)
-            // await new Promise(resolve => setTimeout(resolve, 300));
-            
             const updatedCart = JSON.parse(localStorage.getItem("cart") || "[]");
             setCart(updatedCart);
             calculateTotals(updatedCart);
