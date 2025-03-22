@@ -176,31 +176,85 @@ export default function ShowTimeSlots() {
         }
     };
 
-    return (
-        <div className="container mx-auto px-4 py-8 space-y-8">
-            {isLoading ? (
-                <Loading message="กำลังโหลดข้อมูล..." />
-            ) : (
-                <>
-                    {/* Date Selection */}
-                    <div className={`
-                        border-2 rounded-xl p-6 flex items-center justify-between w-full
-                        ${completedSteps.date ? 'border-green-500' : 'border-gray-300'}
-                    `}>
-                        <div className="text-2xl font-bold w-1/2 text-left">
-                            <p>1. เลือกวันที่ต้องการจอง</p>
-                        </div>
+    // Helper function to get step status classes
+    const getStepStatusClasses = (isActive: boolean, isCompleted: boolean) => {
+        if (!isActive) return "opacity-50 pointer-events-none";
+        if (isCompleted) return "border-primary-600";
+        return "border-neutral-200";
+    };
 
-                        <div className="flex flex-col items-end w-1/4">
-                            <input 
-                                type="date" 
-                                value={date ? date.toISOString().split('T')[0] : ''} 
-                                onChange={(e) => handleDateSelect(new Date(e.target.value))}
-                                min={new Date().toISOString().split('T')[0]}
-                                className="w-full max-w-md px-2 py-4 border rounded-lg text-center"
-                            />
+    return (
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <h1 className="text-3xl font-bold mb-8 text-center">จองโต๊ะอาหาร</h1>
+            
+            {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                    <Loading message="กำลังโหลดข้อมูล..." />
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {/* Step indicators */}
+                    <div className="flex justify-between mb-8 px-6">
+                        {[
+                            { step: 1, label: "เลือกวันที่", completed: completedSteps.date },
+                            { step: 2, label: "เลือกเวลา", completed: completedSteps.time },
+                            { step: 3, label: "เลือกโต๊ะ", completed: completedSteps.table },
+                            { step: 4, label: "ยืนยัน", completed: false }
+                        ].map((stepInfo, index) => (
+                            <div key={index} className="flex flex-col items-center">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                                    stepInfo.completed 
+                                        ? "bg-primary-600 text-white" 
+                                        : (
+                                            (index === 0) || 
+                                            (index === 1 && completedSteps.date) || 
+                                            (index === 2 && completedSteps.time) ||
+                                            (index === 3 && completedSteps.table)
+                                                ? "bg-white border-2 border-primary-600 text-primary-600" 
+                                                : "bg-neutral-100 text-neutral-400"
+                                        )
+                                }`}>
+                                    {stepInfo.completed ? (
+                                        <span className="material-symbols-outlined text-sm">check</span>
+                                    ) : (
+                                        stepInfo.step
+                                    )}
+                                </div>
+                                <span className={`text-sm ${
+                                    (index === 0) || 
+                                    (index === 1 && completedSteps.date) || 
+                                    (index === 2 && completedSteps.time) ||
+                                    (index === 3 && completedSteps.table)
+                                        ? "text-neutral-900" 
+                                        : "text-neutral-400"
+                                }`}>
+                                    {stepInfo.label}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Date Selection */}
+                    <div className={`bg-white rounded-xl shadow-sm p-6 transition-all ${getStepStatusClasses(true, completedSteps.date)}`}>
+                        <div className="flex items-center mb-4">
+                            <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mr-3">
+                                1
+                            </div>
+                            <h2 className="text-xl font-semibold">เลือกวันที่ต้องการจอง</h2>
+                        </div>
+                        
+                        <div className="flex flex-col items-center">
+                            <div className="w-full max-w-xs">
+                                <input 
+                                    type="date" 
+                                    value={date ? date.toISOString().split('T')[0] : ''} 
+                                    onChange={(e) => handleDateSelect(new Date(e.target.value))}
+                                    min={new Date().toISOString().split('T')[0]}
+                                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                />
+                            </div>
                             {dateError && (
-                                <p className="text-red-500 mt-2 text-sm">
+                                <p className="text-red-500 mt-3 text-sm">
                                     {dateError}
                                 </p>
                             )}
@@ -208,59 +262,59 @@ export default function ShowTimeSlots() {
                     </div>
 
                     {/* Time Selection */}
-                    <div className={`
-                        border-2 rounded-xl p-6 
-                        ${completedSteps.date ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                        ${completedSteps.time ? 'border-green-500' : 'border-gray-300'}
-                    `}>
-                        <h2 className="text-2xl font-bold mb-4">
-                            2. เลือกเวลา
-                        </h2>
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            {Array.from({ length: 11 }, (_, i) => (
-                                <div 
-                                    key={i}
-                                    onClick={() => handleTimeSelect((10 + i).toString())}
-                                    className={`
-                                        cursor-pointer 
-                                        ${time === (10 + i).toString() ? 'bg-black text-white' : 'hover:scale-105'}
-                                        rounded-xl
-                                    `}
-                                >
-                                    <TimeCard time={(10 + i).toString()} />
-                                </div>
-                            ))}
+                    <div className={`bg-white rounded-xl shadow-sm p-6 transition-all ${getStepStatusClasses(completedSteps.date, completedSteps.time)}`}>
+                        <div className="flex items-center mb-4">
+                            <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mr-3">
+                                2
+                            </div>
+                            <h2 className="text-xl font-semibold">เลือกเวลา</h2>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-3 justify-center">
+                            {Array.from({ length: 11 }, (_, i) => {
+                                const timeValue = (10 + i).toString();
+                                return (
+                                    <div 
+                                        key={i}
+                                        onClick={() => handleTimeSelect(timeValue)}
+                                        className={`cursor-pointer transition-all ${
+                                            time === timeValue 
+                                                ? 'ring-2 ring-primary-600 scale-105' 
+                                                : 'hover:scale-105'
+                                        }`}
+                                    >
+                                        <TimeCard time={timeValue} />
+                                    </div>
+                                );
+                            })}
                         </div>
 
-                        <div>
-                            {timeError && (
-                                <p className="text-red-500 mt-2 text-center">
-                                    {timeError}
-                                </p>
-                            )}
-                        </div>
+                        {timeError && (
+                            <p className="text-red-500 mt-4 text-sm text-center">
+                                {timeError}
+                            </p>
+                        )}
                     </div>
 
                     {/* Table Selection */}
-                    <div className={`
-                        border-2 rounded-xl p-6 
-                        ${completedSteps.time ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                        ${completedSteps.table ? 'border-green-500' : 'border-gray-300'}
-                    `}>
-                        <h2 className="text-2xl font-bold mb-4">
-                            3. เลือกโต๊ะ
-                        </h2>
+                    <div className={`bg-white rounded-xl shadow-sm p-6 transition-all ${getStepStatusClasses(completedSteps.time, completedSteps.table)}`}>
+                        <div className="flex items-center mb-4">
+                            <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mr-3">
+                                3
+                            </div>
+                            <h2 className="text-xl font-semibold">เลือกโต๊ะ</h2>
+                        </div>
 
-                        <div className="flex flex-wrap gap-4 justify-center">
+                        <div className="flex flex-wrap gap-3 justify-center">
                             {tables.map((table: any) => (
                                 <div
                                     key={table.id}
                                     onClick={() => handleTableSelect(table.id.toString())}
-                                    className={`
-                                        cursor-pointer 
-                                        ${table_id === table.id.toString() ? 'bg-black text-white' : 'hover:scale-105'}
-                                        rounded-xl
-                                    `}
+                                    className={`cursor-pointer transition-all ${
+                                        table_id === table.id.toString() 
+                                            ? 'ring-2 ring-primary-600 scale-105' 
+                                            : 'hover:scale-105'
+                                    }`}
                                 >
                                     <Table id={table.id} seats={table.seats} />
                                 </div>
@@ -269,28 +323,47 @@ export default function ShowTimeSlots() {
                     </div>
 
                     {/* Reservation Confirmation */}
-                    <div className={`
-                        border-2 rounded-xl p-6 
-                        ${completedSteps.table ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                    `}>
-                        <h2 className="text-2xl font-bold mb-4">
-                            4. ยืนยันการจอง
-                        </h2>
+                    <div className={`bg-white rounded-xl shadow-sm p-6 transition-all ${getStepStatusClasses(completedSteps.table, false)}`}>
+                        <div className="flex items-center mb-4">
+                            <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mr-3">
+                                4
+                            </div>
+                            <h2 className="text-xl font-semibold">ยืนยันการจอง</h2>
+                        </div>
+                        
                         {completedSteps.table && (
-                            <div className="text-center">
-                                <p>วันที่: {date?.toLocaleDateString()}</p>
-                                <p>เวลา: {time}:00</p>
-                                <p>โต๊ะ: {table_id}</p>
+                            <div className="bg-neutral-50 p-6 rounded-lg text-center">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                    <div className="flex flex-col items-center p-3 bg-white rounded-lg">
+                                        <span className="material-symbols-outlined text-primary-600 mb-2">calendar_today</span>
+                                        <p className="text-sm text-neutral-500">วันที่</p>
+                                        <p className="font-medium">{date?.toLocaleDateString('th-TH')}</p>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center p-3 bg-white rounded-lg">
+                                        <span className="material-symbols-outlined text-primary-600 mb-2">schedule</span>
+                                        <p className="text-sm text-neutral-500">เวลา</p>
+                                        <p className="font-medium">{time}:00 น.</p>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center p-3 bg-white rounded-lg">
+                                        <span className="material-symbols-outlined text-primary-600 mb-2">table_restaurant</span>
+                                        <p className="text-sm text-neutral-500">โต๊ะ</p>
+                                        <p className="font-medium">โต๊ะที่ {table_id}</p>
+                                    </div>
+                                </div>
+                                
                                 <button 
                                     onClick={handleReservation}
-                                    className="mt-4 bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600"
+                                    className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center mx-auto"
                                 >
+                                    <span className="material-symbols-outlined mr-2">check_circle</span>
                                     ยืนยันการจอง
                                 </button>
                             </div>
                         )}
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
