@@ -2,16 +2,6 @@
 
 import { useState } from "react";
 
-interface Reservation {
-    appointment_time: string;
-    date: string;
-    id: string;
-    status: string;
-    table_id: string;
-    created_at: string;
-    user_id: string;
-}
-
 async function changeReservationStatus({ id, status }: { id: string; status: string }) {
     try {
         const body = {

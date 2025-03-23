@@ -4,21 +4,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { User } from '@/interfaces/User';
+import OrderTable from '@/components/User/OrderTable';
+import ReservationTable from '@/components/User/ReservationTable';
 
-interface Order {
+// Types for our data
+interface UserData {
+  address: string;
+  email: string;
   id: string;
-  date: string;
-  total: number;
-  status: string;
-}
-
-interface Reservation {
-  id: string;
-  date: string;
-  time: string;
-  guests: number;
-  status: string;
+  name: string;
+  phone_number: string;
+  role: string;
+  username: string;
 }
 
 type MenuSection = 'profile' | 'orders' | 'reservations';
@@ -28,9 +25,7 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const [activeSection, setActiveSection] = useState<MenuSection>('profile');
   
-  const [userData, setUserData] = useState<User | null>(null);
-  const [orderData, setOrderData] = useState<Order[]>([]);
-  const [reservationData, setReservationData] = useState<Reservation[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -54,29 +49,6 @@ export default function ProfilePage() {
           
           const data = await response.json();
           setUserData(data.data);
-          
-          // Here you would also fetch orders and reservations
-          // Example:
-          // const ordersResponse = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}/orders`);
-          // if (ordersResponse.ok) {
-          //   const ordersData = await ordersResponse.json();
-          //   setOrderData(ordersData);
-          // }
-          
-          // For now, we'll use mock data for orders and reservations
-          setOrderData([
-            { id: "ORD-001", date: "2025-03-20", total: 1250, status: "completed" },
-            { id: "ORD-002", date: "2025-03-15", total: 850, status: "delivered" },
-            { id: "ORD-003", date: "2025-03-10", total: 1500, status: "processing" },
-            { id: "ORD-004", date: "2025-03-05", total: 950, status: "cancelled" },
-          ]);
-          
-          setReservationData([
-            { id: "RES-001", date: "2025-03-25", time: "18:00", guests: 4, status: "confirmed" },
-            { id: "RES-002", date: "2025-03-18", time: "19:30", guests: 2, status: "completed" },
-            { id: "RES-003", date: "2025-04-05", time: "12:00", guests: 6, status: "pending" },
-          ]);
-          
         } catch (err) {
           setError('Failed to load user data. Please try again later.');
           console.error('Error fetching user data:', err);
@@ -92,22 +64,6 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     await signOut({ redirect: false });
     router.push('/login');
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'confirmed':
-      case 'delivered':
-        return 'bg-acceptGreen text-background';
-      case 'processing':
-      case 'pending':
-        return 'bg-searchBox text-primary';
-      case 'cancelled':
-        return 'bg-cancelRed text-background';
-      default:
-        return 'bg-searchBox text-primary';
-    }
   };
 
   // Show loading state
@@ -156,214 +112,84 @@ export default function ProfilePage() {
     );
   }
 
+  const renderProfileSection = () => {
+    return (
+      <div className="bg-background shadow-sm rounded-lg p-6 border border-searchBox">
+        <h2 className="text-2xl font-semibold text-mainText mb-6">ข้อมูลส่วนตัว</h2>
+        
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          <div className="flex justify-center">
+            <div className="h-32 w-32 rounded-full bg-searchBox flex items-center justify-center text-3xl text-secondText font-semibold">
+              {userData.name.charAt(0)}
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p className="text-secondText mb-1">ชื่อ-นามสกุล</p>
+            <p className="text-mainText font-medium">{userData.name}</p>
+          </div>
+          
+          <div>
+            <p className="text-secondText mb-1">อีเมล</p>
+            <p className="text-mainText font-medium">{userData.email}</p>
+          </div>
+          
+          <div>
+            <p className="text-secondText mb-1">ชื่อผู้ใช้</p>
+            <p className="text-mainText font-medium">{userData.username}</p>
+          </div>
+          
+          <div>
+            <p className="text-secondText mb-1">เบอร์โทรศัพท์</p>
+            <p className="text-mainText font-medium">{userData.phone_number}</p>
+          </div>
+          
+          <div className="md:col-span-2">
+            <p className="text-secondText mb-1">ที่อยู่</p>
+            <p className="text-mainText font-medium">{userData.address}</p>
+          </div>
+          
+          <div>
+            <p className="text-secondText mb-1">ประเภทผู้ใช้</p>
+            <p className="text-mainText font-medium capitalize">{userData.role}</p>
+          </div>
+          
+          <div>
+            <p className="text-secondText mb-1">รหัสผู้ใช้</p>
+            <p className="text-mainText font-medium">{userData.id}</p>
+          </div>
+        </div>
+        
+        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+          <button 
+            onClick={() => router.push('/edit-profile')} 
+            className="py-2 px-4 bg-button hover:bg-hoverButton text-background rounded-md transition-colors"
+          >
+            แก้ไขข้อมูล
+          </button>
+          <button 
+            onClick={() => router.push('/change-password')} 
+            className="py-2 px-4 border border-searchBox text-primary hover:bg-searchBox rounded-md transition-colors"
+          >
+            เปลี่ยนรหัสผ่าน
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderSection = () => {
     switch (activeSection) {
       case 'profile':
-        return (
-          <div className="bg-background shadow-sm rounded-lg p-6 border border-searchBox">
-            <h2 className="text-2xl font-semibold text-mainText mb-6">ข้อมูลส่วนตัว</h2>
-            
-            <div className="grid grid-cols-1 gap-6 mb-6">
-              <div className="flex justify-center">
-                <div className="h-32 w-32 rounded-full bg-searchBox flex items-center justify-center text-3xl text-secondText font-semibold">
-                  {userData.name.charAt(0)}
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-secondText mb-1">ชื่อ-นามสกุล</p>
-                <p className="text-mainText font-medium">{userData.name}</p>
-              </div>
-              
-              <div>
-                <p className="text-secondText mb-1">อีเมล</p>
-                <p className="text-mainText font-medium">{userData.email}</p>
-              </div>
-              
-              <div>
-                <p className="text-secondText mb-1">ชื่อผู้ใช้</p>
-                <p className="text-mainText font-medium">{userData.username}</p>
-              </div>
-              
-              <div>
-                <p className="text-secondText mb-1">เบอร์โทรศัพท์</p>
-                <p className="text-mainText font-medium">{userData.phone_number}</p>
-              </div>
-              
-              <div className="md:col-span-2">
-                <p className="text-secondText mb-1">ที่อยู่</p>
-                <p className="text-mainText font-medium">{userData.address}</p>
-              </div>
-              
-              <div>
-                <p className="text-secondText mb-1">ประเภทผู้ใช้</p>
-                <p className="text-mainText font-medium capitalize">{userData.role}</p>
-              </div>
-              
-              <div>
-                <p className="text-secondText mb-1">รหัสผู้ใช้</p>
-                <p className="text-mainText font-medium">{userData.id}</p>
-              </div>
-            </div>
-            
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <button 
-                onClick={() => router.push('/edit-profile')} 
-                className="py-2 px-4 bg-button hover:bg-hoverButton text-background rounded-md transition-colors"
-              >
-                แก้ไขข้อมูล
-              </button>
-              <button 
-                onClick={() => router.push('/change-password')} 
-                className="py-2 px-4 border border-searchBox text-primary hover:bg-searchBox rounded-md transition-colors"
-              >
-                เปลี่ยนรหัสผ่าน
-              </button>
-            </div>
-          </div>
-        );
-        
+        return renderProfileSection();
       case 'orders':
-        return (
-          <div className="bg-background shadow-sm rounded-lg p-6 border border-searchBox">
-            <h2 className="text-2xl font-semibold text-mainText mb-6">ประวัติการสั่งซื้อ</h2>
-            
-            {orderData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-searchBox">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        เลขที่ออเดอร์
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        วันที่
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        ยอดรวม
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        สถานะ
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        การจัดการ
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-background divide-y divide-searchBox">
-                    {orderData.map((order) => (
-                      <tr key={order.id}>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-mainText">
-                          {order.id}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          {new Date(order.date).toLocaleDateString('th-TH')}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          {order.total.toLocaleString()} ฿
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                            {order.status === 'completed' ? 'เสร็จสิ้น' : 
-                             order.status === 'delivered' ? 'จัดส่งแล้ว' : 
-                             order.status === 'processing' ? 'กำลังดำเนินการ' : 
-                             order.status === 'cancelled' ? 'ยกเลิก' : order.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          <Link href={`/orders/${order.id}`} className="text-inputFieldFocus hover:text-primary">
-                            ดูรายละเอียด
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-secondText">ไม่มีประวัติการสั่งซื้อ</p>
-              </div>
-            )}
-          </div>
-        );
-        
+        return <OrderTable userId={userData.id} />;
       case 'reservations':
-        return (
-          <div className="bg-background shadow-sm rounded-lg p-6 border border-searchBox">
-            <h2 className="text-2xl font-semibold text-mainText mb-6">ประวัติการจอง</h2>
-            
-            {reservationData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-searchBox">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        เลขที่การจอง
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        วันที่
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        เวลา
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        จำนวนคน
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        สถานะ
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                        การจัดการ
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-background divide-y divide-searchBox">
-                    {reservationData.map((reservation) => (
-                      <tr key={reservation.id}>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-mainText">
-                          {reservation.id}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          {new Date(reservation.date).toLocaleDateString('th-TH')}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          {reservation.time}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          {reservation.guests} ท่าน
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
-                            {reservation.status === 'confirmed' ? 'ยืนยันแล้ว' : 
-                             reservation.status === 'completed' ? 'เสร็จสิ้น' : 
-                             reservation.status === 'pending' ? 'รอยืนยัน' : reservation.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
-                          <Link href={`/reservations/${reservation.id}`} className="text-inputFieldFocus hover:text-primary">
-                            ดูรายละเอียด
-                          </Link>
-                          {reservation.status === 'pending' && (
-                            <button className="ml-3 text-cancelRed hover:text-hoverCancel">
-                              ยกเลิก
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-secondText">ไม่มีประวัติการจอง</p>
-              </div>
-            )}
-          </div>
-        );
+        return <ReservationTable userId={userData.id} />;
+      default:
+        return renderProfileSection();
     }
   };
 
