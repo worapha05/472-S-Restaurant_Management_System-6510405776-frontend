@@ -27,6 +27,9 @@ export default function DashboardPage() {
     return null; // Will redirect via useEffect
   }
 
+  console.log("Session Data:", session);
+  
+
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/login' });
   };

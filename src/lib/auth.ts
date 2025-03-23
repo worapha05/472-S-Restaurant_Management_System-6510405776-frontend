@@ -74,7 +74,7 @@ export const authOptions: NextAuthOptions = {
               console.error("Authentication failed with status:", response.status);
               throw new Error(`Authentication failed: Server returned ${response.status}`);
             }
-          } catch (apiError) {
+          } catch (apiError : any) {
             if (apiError.response) {
               console.error("API error response:", {
                 status: apiError.response.status,
