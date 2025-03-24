@@ -126,7 +126,7 @@ export default function OrderList({ userId }: OrderListProps) {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
                     {/* {new Date(order.accept || "").toLocaleDateString('th-TH')} */}
-                    {order.accept}
+                    {order.created_at}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-primary">
                     {order.sum_price.toLocaleString()} ฿

@@ -50,9 +50,6 @@ const StandaloneMinioUploader = () => {
       // Create a FormData object to send the file
       const formData = new FormData();
       formData.append('file', selectedFile);
-
-      console.log(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/upload`);
-      
       
       // Send the file directly to your backend for uploading
       const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/upload`, {

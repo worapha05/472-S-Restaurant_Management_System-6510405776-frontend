@@ -18,15 +18,11 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log('Attempting login with:', { email, password: '***' });
-      
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
-
-      console.log('SignIn result:', result);
 
       if (result?.error) {
         setError(`Error: ${result.error}`);
