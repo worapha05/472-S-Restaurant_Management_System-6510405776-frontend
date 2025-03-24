@@ -1,6 +1,7 @@
 'use client';
 
 import Loading from "@/components/Loading";
+import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -10,6 +11,7 @@ const paymentMethods = [
 ];
 
 export default function CheckoutPage() {
+    const { data: session, status } = useSession();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [address, setAddress] = useState("");
@@ -33,6 +35,10 @@ export default function CheckoutPage() {
             setError("กรุณาเลือกช่องทางการชำระเงิน");
             return;
         }
+        if(session === null){
+            setError("กรุณาเข้าสู่ระบบก่อนดำเนินการสั่งซื้อ");
+            return;
+        }
 
         setIsLoading(true);
         setError("");
@@ -45,6 +51,7 @@ export default function CheckoutPage() {
             const sumPrice = cartItems.reduce((total: number, item: any) => {
                 return total + item.food.price * item.quantity;
             }, 0);
+            const user_id = session.user.id;
             
 
             const res = await fetch(`http://localhost/api/orders`, {
@@ -53,7 +60,7 @@ export default function CheckoutPage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    user_id: 1, // TO DO: Get UID From Token Login User
+                    user_id: user_id, // TO DO: Get UID From Token Login User
                     table_id: null, 
                     address: address,
                     type: "DELIVERY",

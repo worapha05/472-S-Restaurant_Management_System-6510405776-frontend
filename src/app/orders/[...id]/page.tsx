@@ -331,6 +331,9 @@ function OrderDetail({ order }: { order: Order }) {
 // Main order detail page component
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const order = await getOrderById(params.id);
+
+  console.log('Fetched order:', order);
+  
   
   if (!order) {
     notFound();
