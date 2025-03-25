@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import OrderTable from '@/components/User/OrderTable';
 import ReservationTable from '@/components/User/ReservationTable';
+import Loading from '@/components/Loading';
 
 // Types for our data
 interface UserData {
@@ -22,8 +23,16 @@ type MenuSection = 'profile' | 'orders' | 'reservations';
 
 export default function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const [activeSection, setActiveSection] = useState<MenuSection>('profile');
+  
+  // Check for section parameter in URL to set initial active section
+  const sectionParam = searchParams.get('section') as MenuSection | null;
+  const [activeSection, setActiveSection] = useState<MenuSection>(
+    sectionParam && ['profile', 'orders', 'reservations'].includes(sectionParam) 
+      ? sectionParam 
+      : 'profile'
+  );
   
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,13 +51,16 @@ export default function ProfilePage() {
         try {
           setIsLoading(true);
           const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}`);
-          
+
           if (!response.ok) {
             throw new Error('Failed to fetch user data');
           }
           
           const data = await response.json();
           setUserData(data.data);
+
+          console.log(session);
+          
         } catch (err) {
           setError('Failed to load user data. Please try again later.');
           console.error('Error fetching user data:', err);
@@ -61,7 +73,38 @@ export default function ProfilePage() {
     fetchUserData();
   }, [session, status, router]);
 
+  // Update URL when section changes
+  useEffect(() => {
+    if (activeSection !== 'profile') {
+      router.push(`/dashboard?section=${activeSection}`, { scroll: false });
+    } else {
+      router.push('/dashboard', { scroll: false });
+    }
+  }, [activeSection, router]);
+
+  // Handle section change from URL
+  useEffect(() => {
+    if (sectionParam && ['profile', 'orders', 'reservations'].includes(sectionParam)) {
+      setActiveSection(sectionParam);
+    }
+  }, [sectionParam]);
+
   const handleSignOut = async () => {
+    if (session?.user?.accessToken) {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_CLIENT_API_URL;
+        await fetch(`${apiUrl}/api/revoke`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${session.user.accessToken}`
+          }
+        });
+      } catch (error) {
+        console.error('Error revoking token:', error);
+        // Continue with logout even if token revocation fails
+      }
+    }
+
     await signOut({ redirect: false });
     router.push('/login');
   };
@@ -69,12 +112,7 @@ export default function ProfilePage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-inputFieldFocus mx-auto"></div>
-          <p className="mt-4 text-primary">กำลังโหลดข้อมูล...</p>
-        </div>
-      </div>
+      <Loading message='กําลังโหลดข้อมูล...' />
     );
   }
 
@@ -169,12 +207,6 @@ export default function ProfilePage() {
           >
             แก้ไขข้อมูล
           </button>
-          <button 
-            onClick={() => router.push('/change-password')} 
-            className="py-2 px-4 border border-searchBox text-primary hover:bg-searchBox rounded-md transition-colors"
-          >
-            เปลี่ยนรหัสผ่าน
-          </button>
         </div>
       </div>
     );
@@ -195,26 +227,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-background border-b border-searchBox">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex">
-              <Link href="/" className="text-2xl font-bold text-mainText">
-                MyApp
-              </Link>
-            </div>
-            <div>
-              <button
-                onClick={handleSignOut}
-                className="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-background bg-cancelRed hover:bg-hoverCancel"
-              >
-                ออกจากระบบ
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">

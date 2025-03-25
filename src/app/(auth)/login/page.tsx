@@ -114,8 +114,8 @@ export default function LoginPage() {
               </div> */}
 
               <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-inputFieldFocus hover:text-primary">
-                  ลืมรหัสผ่าน?
+                <Link href="/signup" className="font-medium text-inputFieldFocus hover:text-primary">
+                  สมัครสมาชิก
                 </Link>
               </div>
             </div>

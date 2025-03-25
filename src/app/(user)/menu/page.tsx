@@ -56,7 +56,6 @@ export default function MenuPage() {
 
     return (
         <>
-            <Navbar />
             <div className="flex flex-row justify-center w-full h-[calc(100vh-76px)] overflow-x-hidden overflow-y-scroll bg-red-100">
                 <div className="w-full mx-16 bg-red-600">
                     {/* Header and nav content */}
