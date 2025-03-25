@@ -4,7 +4,7 @@ import MenuCard from "@/components/Menu/MenuCard";
 import Link from "next/link";
 
 async function getData() {
-    const res = await fetch("http://omnidine-backend-laravel.test-1/api/foods");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/foods`);
 
     if (!res.ok) {
         throw new Error('Failed to fetch data');
@@ -20,7 +20,6 @@ export default async function MenuPage() {
 
     return (
         <>
-            <Navbar />
             <div className="flex flex-col items-center justify-center w-full px-4">
                 <div className="flex items-center justify-between w-full max-w-5xl">
                     <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
