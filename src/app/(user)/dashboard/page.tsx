@@ -58,6 +58,9 @@ export default function ProfilePage() {
           
           const data = await response.json();
           setUserData(data.data);
+
+          console.log(session);
+          
         } catch (err) {
           setError('Failed to load user data. Please try again later.');
           console.error('Error fetching user data:', err);
@@ -224,26 +227,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-background border-b border-searchBox">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex">
-              <Link href="/" className="text-2xl font-bold text-mainText">
-                MyApp
-              </Link>
-            </div>
-            <div>
-              <button
-                onClick={handleSignOut}
-                className="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-background bg-cancelRed hover:bg-hoverCancel"
-              >
-                ออกจากระบบ
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
