@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import OrderTable from '@/components/User/OrderTable';
 import ReservationTable from '@/components/User/ReservationTable';
+import Loading from '@/components/Loading';
 
 // Types for our data
 interface UserData {
@@ -42,7 +43,7 @@ export default function ProfilePage() {
         try {
           setIsLoading(true);
           const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}`);
-          
+
           if (!response.ok) {
             throw new Error('Failed to fetch user data');
           }
@@ -62,6 +63,22 @@ export default function ProfilePage() {
   }, [session, status, router]);
 
   const handleSignOut = async () => {
+
+    if (session?.user?.accessToken) {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_CLIENT_API_URL;
+        await fetch(`${apiUrl}/api/revoke`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${session.user.accessToken}`
+          }
+        });
+      } catch (error) {
+        console.error('Error revoking token:', error);
+        // Continue with logout even if token revocation fails
+      }
+    }
+
     await signOut({ redirect: false });
     router.push('/login');
   };
@@ -69,12 +86,7 @@ export default function ProfilePage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-inputFieldFocus mx-auto"></div>
-          <p className="mt-4 text-primary">กำลังโหลดข้อมูล...</p>
-        </div>
-      </div>
+      <Loading message='กําลังโหลดข้อมูล...' />
     );
   }
 
@@ -168,12 +180,6 @@ export default function ProfilePage() {
             className="py-2 px-4 bg-button hover:bg-hoverButton text-background rounded-md transition-colors"
           >
             แก้ไขข้อมูล
-          </button>
-          <button 
-            onClick={() => router.push('/change-password')} 
-            className="py-2 px-4 border border-searchBox text-primary hover:bg-searchBox rounded-md transition-colors"
-          >
-            เปลี่ยนรหัสผ่าน
           </button>
         </div>
       </div>

@@ -25,7 +25,13 @@ export default function OrderList({ userId }: OrderListProps) {
           return;
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${id}/orders`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${id}/orders`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session?.user?.accessToken}`,
+            
+          },
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch order data');
