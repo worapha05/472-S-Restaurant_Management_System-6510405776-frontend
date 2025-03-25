@@ -7,8 +7,10 @@ services:
       - "7070:3000"
     volumes:
       - .:/app
-      - /app/node_modules
-      - /app/.next
+      # Persist node_modules to avoid unnecessary npm installs
+      - node_modules:/app/node_modules
+      # Persist Next.js build cache
+      - .next:/app/.next
     environment:
       - NODE_ENV=development
     command: bun run dev
@@ -19,3 +21,7 @@ networks:
   omnidine:
     name: omnidine-backend_sail
     external: true
+
+volumes:
+  # Named volume for node_modules to persist between restarts
+  node_modules:

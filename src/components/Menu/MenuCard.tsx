@@ -5,7 +5,7 @@ interface Menu {
     id: number;
     name: string;
     price: number;  // Price as a number
-    status: "available" | "unavailable";  // Assuming status can only be these two
+    status: "AVAILABLE" | "UNAVAILABLE";  // Assuming status can only be these two
     category: 'APPETIZER' | 'ENTREE' | 'MAIN COURSE' | 'DESSERT' | 'DRINK';
     description: string;
     image_url: string;
@@ -17,7 +17,7 @@ interface CartList {
     quantity: number;
 }
 
-const MenuCard = ({ menu }: {menu : Menu}) => {
+const MenuCard = ({ menu, onSelectFood }: { menu: Menu, onSelectFood: (food: Menu) => void }) => {
 
     const addToCart = () => {
         // Add the item to the cart
@@ -53,14 +53,19 @@ const MenuCard = ({ menu }: {menu : Menu}) => {
                         {menu.category}
                     </span>
                 </div>
+                <div className="absolute bottom-4 right-4">
+                    <span className="text-xs tracking-wider text-gray-600">
+                        {menu.status}
+                    </span>
+                </div>
             </div>
             <div className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{menu.name}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                    {menu.description}
-                </p>
 
-                <button className="mt-4 text-sm text-gray-800 hover:text-gray-600 flex items-center">
+                <button
+                    className="mt-4 text-sm text-gray-800 hover:text-gray-600 flex items-center"
+                    onClick={() => onSelectFood(menu)}
+                >
                     SEE MORE DETAILS
                     <svg
                         className="w-4 h-4 ml-1"
@@ -78,11 +83,11 @@ const MenuCard = ({ menu }: {menu : Menu}) => {
                 </button>
 
                 {/* add to cart button on the right, price on the left*/}
-                <div className="flex justify-between mt-4">
+                <div className="flex items-center justify-between mt-4">
                     <span className="text-lg font-semibold">฿ {menu.price}</span>
                     <form>
                         <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-                                onClick={addToCart}>
+                            onClick={addToCart}>
                             ADD TO CART
                         </button>
                     </form>
