@@ -170,7 +170,7 @@ const Navbar = () => {
                             <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl z-10 border border-gray-200">
                                 {/* Show profile for all users */}
                                 <Link 
-                                    href={userRole === 'STAFF' || userRole === 'ADMIN' ? '/profile' : '/dashboard'} 
+                                    href={userRole === 'STAFF' || userRole === 'ADMIN' ? '/profile' : '/profile'} 
                                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     onClick={() => setIsDropdownOpen(false)}
                                 >
