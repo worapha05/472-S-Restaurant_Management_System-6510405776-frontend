@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import OrderTable from '@/components/User/OrderTable';
@@ -23,8 +23,16 @@ type MenuSection = 'profile' | 'orders' | 'reservations';
 
 export default function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const [activeSection, setActiveSection] = useState<MenuSection>('profile');
+  
+  // Check for section parameter in URL to set initial active section
+  const sectionParam = searchParams.get('section') as MenuSection | null;
+  const [activeSection, setActiveSection] = useState<MenuSection>(
+    sectionParam && ['profile', 'orders', 'reservations'].includes(sectionParam) 
+      ? sectionParam 
+      : 'profile'
+  );
   
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,8 +70,23 @@ export default function ProfilePage() {
     fetchUserData();
   }, [session, status, router]);
 
-  const handleSignOut = async () => {
+  // Update URL when section changes
+  useEffect(() => {
+    if (activeSection !== 'profile') {
+      router.push(`/dashboard?section=${activeSection}`, { scroll: false });
+    } else {
+      router.push('/dashboard', { scroll: false });
+    }
+  }, [activeSection, router]);
 
+  // Handle section change from URL
+  useEffect(() => {
+    if (sectionParam && ['profile', 'orders', 'reservations'].includes(sectionParam)) {
+      setActiveSection(sectionParam);
+    }
+  }, [sectionParam]);
+
+  const handleSignOut = async () => {
     if (session?.user?.accessToken) {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_CLIENT_API_URL;
