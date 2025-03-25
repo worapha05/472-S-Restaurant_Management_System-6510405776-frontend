@@ -6,4 +6,5 @@ interface Reservation {
     table_id: string;
     created_at: string;
     user_id: string;
+    user_name: string;
 }

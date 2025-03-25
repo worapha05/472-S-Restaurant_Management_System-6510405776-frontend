@@ -3,17 +3,6 @@
 import { useState, useEffect } from "react";
 import ReservationCard from "@/components/Reservation/ReservationCard";
 
-// Type definition for reservation objects
-interface Reservation {
-    appointment_time: string;
-    date: string;
-    id: string;
-    status: string;
-    table_id: string;
-    created_at: string;
-    user_id: string;
-}
-
 // Server component for data fetching
 async function getData() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/reservations`);
@@ -32,9 +21,29 @@ export default function ReservationsPage() {
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [filteredReservations, setFilteredReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    // Date filter state
     const [dateFilter, setDateFilter] = useState("all");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    
+    // Status filter
+    const [statusFilter, setStatusFilter] = useState("all");
+
+    // Status options with translations
+    const statusOptions = [
+        { value: "all", label: "ทั้งหมด" },
+        { value: "confirmed", label: "ยืนยันแล้ว" },
+        { value: "pending", label: "รอยืนยัน" },
+        { value: "completed", label: "เสร็จสิ้น" },
+        { value: "cancelled", label: "ยกเลิก" }
+    ];
+
+    // Get status text based on status value
+    const getStatusText = (status: string) => {
+        const option = statusOptions.find(opt => opt.value.toLowerCase() === status.toLowerCase());
+        return option ? option.label : status;
+    };
 
     // Fetch reservations data
     useEffect(() => {
@@ -54,12 +63,12 @@ export default function ReservationsPage() {
         fetchData();
     }, []);
 
-    // Apply date filters when they change
+    // Apply date and status filters when they change
     useEffect(() => {
         filterReservations();
-    }, [dateFilter, startDate, endDate, reservations]);
+    }, [dateFilter, statusFilter, startDate, endDate, reservations]);
 
-    // Filter reservations based on date filter
+    // Filter reservations based on date and status filter
     const filterReservations = () => {
         if (!reservations.length) return;
 
@@ -67,6 +76,7 @@ export default function ReservationsPage() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
+        // Apply date filter
         switch (dateFilter) {
             case "today":
                 filtered = reservations.filter(res => {
@@ -121,99 +131,138 @@ export default function ReservationsPage() {
                 break;
                 
             default:
-                // "all" - no filtering needed
+                // "all" - no date filtering needed
                 break;
         }
         
+        // Apply status filter
+        if (statusFilter !== "all") {
+            filtered = filtered.filter(res => 
+                res.status.toLowerCase() === statusFilter.toLowerCase()
+            );
+        }
+        
         setFilteredReservations(filtered);
+    };
+
+    // Count reservations by status
+    const getStatusCount = (status: string) => {
+        if (status === "all") return reservations.length;
+        
+        return reservations.filter(res => 
+            res.status.toLowerCase() === status.toLowerCase()
+        ).length;
     };
 
     return (
         <div className="flex flex-col items-center justify-center w-full px-4">
             <div className="flex flex-col gap-4 w-full max-w-5xl">
                 <div className="flex justify-between items-center w-full max-w-5xl py-12">
-                    <p className="font-bold text-3xl">รายการการจอง</p>
+                    <p className="font-bold text-3xl text-mainText">รายการการจอง</p>
                     
-                    <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <button className="bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg flex items-center">
                         <span className="mr-2">+</span>
                         เพิ่มการจอง
                     </button>
                 </div>
 
-                {/* Date Filter Controls */}
-                <div className="bg-white p-4 rounded-xl shadow-sm mb-4 w-full">
-                    <div className="flex flex-col space-y-4">
+                {/* Filter Controls */}
+                <div className="bg-background p-6 rounded-xl shadow-sm mb-4 w-full border border-searchBox">
+                    <div className="flex flex-col space-y-5">
+                        {/* Date Filter Label */}
+                        <div className="flex items-center">
+                            <div className="w-7 h-7 bg-searchBox rounded-full flex items-center justify-center text-mainText mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span className="font-medium text-mainText">กรองตามวันที่</span>
+                        </div>
+                    
+                        {/* Date Filter Buttons */}
                         <div className="flex flex-wrap gap-2">
-                            <button 
-                                onClick={() => setDateFilter("all")}
-                                className={`px-4 py-2 rounded-lg ${dateFilter === "all" 
-                                    ? "bg-primary-600 text-white" 
-                                    : "bg-gray-100 hover:bg-gray-200"}`}
-                            >
-                                ทั้งหมด
-                            </button>
-                            <button 
-                                onClick={() => setDateFilter("today")}
-                                className={`px-4 py-2 rounded-lg ${dateFilter === "today" 
-                                    ? "bg-primary-600 text-white" 
-                                    : "bg-gray-100 hover:bg-gray-200"}`}
-                            >
-                                วันนี้
-                            </button>
-                            <button 
-                                onClick={() => setDateFilter("tomorrow")}
-                                className={`px-4 py-2 rounded-lg ${dateFilter === "tomorrow" 
-                                    ? "bg-primary-600 text-white" 
-                                    : "bg-gray-100 hover:bg-gray-200"}`}
-                            >
-                                พรุ่งนี้
-                            </button>
-                            <button 
-                                onClick={() => setDateFilter("thisWeek")}
-                                className={`px-4 py-2 rounded-lg ${dateFilter === "thisWeek" 
-                                    ? "bg-primary-600 text-white" 
-                                    : "bg-gray-100 hover:bg-gray-200"}`}
-                            >
-                                สัปดาห์นี้
-                            </button>
-                            <button 
-                                onClick={() => setDateFilter("custom")}
-                                className={`px-4 py-2 rounded-lg ${dateFilter === "custom" 
-                                    ? "bg-primary-600 text-white" 
-                                    : "bg-gray-100 hover:bg-gray-200"}`}
-                            >
-                                กำหนดเอง
-                            </button>
+                            {[
+                                { id: "all", label: "ทั้งหมด" },
+                                { id: "today", label: "วันนี้" },
+                                { id: "tomorrow", label: "พรุ่งนี้" },
+                                { id: "thisWeek", label: "สัปดาห์นี้" },
+                                { id: "custom", label: "กำหนดเอง" }
+                            ].map((option) => (
+                                <button 
+                                    key={option.id}
+                                    onClick={() => setDateFilter(option.id)}
+                                    className={`px-4 py-2 rounded-lg transition-colors ${
+                                        dateFilter === option.id 
+                                            ? "bg-button text-white" 
+                                            : "bg-searchBox text-primary hover:bg-hoverButton hover:text-white"
+                                    }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
                         </div>
                         
+                        {/* Custom Date Inputs */}
                         {dateFilter === "custom" && (
-                            <div className="flex flex-wrap gap-4">
+                            <div className="flex flex-wrap gap-4 pt-2">
                                 <div className="flex flex-col">
-                                    <label className="text-sm text-gray-600 mb-1">จากวันที่</label>
+                                    <label className="text-sm text-secondText mb-1">จากวันที่</label>
                                     <input 
                                         type="date" 
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="border border-gray-300 rounded-lg px-3 py-2"
+                                        className="border border-searchBox rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-inputFieldFocus"
                                     />
                                 </div>
                                 <div className="flex flex-col">
-                                    <label className="text-sm text-gray-600 mb-1">ถึงวันที่</label>
+                                    <label className="text-sm text-secondText mb-1">ถึงวันที่</label>
                                     <input 
                                         type="date" 
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="border border-gray-300 rounded-lg px-3 py-2"
+                                        className="border border-searchBox rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-inputFieldFocus"
                                     />
                                 </div>
                             </div>
                         )}
+                        
+                        {/* Status Filter Label */}
+                        <div className="flex items-center pt-2">
+                            <div className="w-7 h-7 bg-searchBox rounded-full flex items-center justify-center text-mainText mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span className="font-medium text-mainText">กรองตามสถานะ</span>
+                        </div>
+                        
+                        {/* Status Filter Buttons */}
+                        <div className="flex flex-wrap gap-2">
+                            {statusOptions.map((option) => (
+                                <button 
+                                    key={option.value}
+                                    onClick={() => setStatusFilter(option.value)}
+                                    className={`px-4 py-2 rounded-lg transition-colors ${
+                                        statusFilter === option.value 
+                                            ? "bg-button text-white" 
+                                            : "bg-searchBox text-primary hover:bg-hoverButton hover:text-white"
+                                    }`}
+                                >
+                                    {option.label}
+                                    {option.value !== "all" && (
+                                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-white text-primary">
+                                            {getStatusCount(option.value)}
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-inputFieldFocus"></div>
                     </div>
                 ) : (
                     <>
@@ -225,8 +274,19 @@ export default function ReservationsPage() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-12 bg-white rounded-xl shadow-sm w-full">
-                                <p className="text-gray-500">ไม่พบรายการจอง</p>
+                            <div className="text-center py-12 bg-background rounded-xl shadow-sm w-full border border-searchBox">
+                                <p className="text-secondText">ไม่พบรายการจอง</p>
+                                {(dateFilter !== "all" || statusFilter !== "all") && (
+                                    <button 
+                                        onClick={() => {
+                                            setDateFilter("all");
+                                            setStatusFilter("all");
+                                        }}
+                                        className="mt-2 text-inputFieldFocus hover:underline"
+                                    >
+                                        ล้างตัวกรอง
+                                    </button>
+                                )}
                             </div>
                         )}
                     </>
