@@ -66,9 +66,9 @@ export default function ProfilePage() {
   // Update URL when section changes
   useEffect(() => {
     if (activeSection !== 'profile') {
-      router.push(`/dashboard?section=${activeSection}`, { scroll: false });
+      router.push(`/profile?section=${activeSection}`, { scroll: false });
     } else {
-      router.push('/dashboard', { scroll: false });
+      router.push('/profile', { scroll: false });
     }
   }, [activeSection, router]);
 
@@ -113,7 +113,7 @@ export default function ProfilePage() {
         <div className="text-center max-w-md p-6 bg-background rounded-lg shadow-md border border-searchBox">
           <p className="text-cancelRed mb-4">{error}</p>
           <button 
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/profile')}
             className="py-2 px-4 bg-button hover:bg-hoverButton text-background rounded-md transition-colors"
           >
             กลับไปหน้าหลัก

@@ -24,7 +24,7 @@ export default function WelcomePage() {
           } else if (session.user.role === 'STAFF') {
             router.push('/orders');
           } else if (session.user.role === 'USER') {
-            router.push('/menus');
+            router.push('/menu');
           }
         }
       };
