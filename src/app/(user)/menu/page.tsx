@@ -56,8 +56,8 @@ export default function MenuPage() {
 
     return (
         <>
-            <div className="flex flex-row justify-center w-full h-[calc(100vh-76px)] overflow-x-hidden overflow-y-scroll bg-red-100">
-                <div className="w-full mx-16 bg-red-600">
+            <div className="flex flex-row justify-center w-full h-[calc(100vh-64px)] overflow-x-hidden">
+                <div className="w-full mx-16">
                     {/* Header and nav content */}
                     <div className="flex items-center justify-between w-full">
                         <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
@@ -85,7 +85,7 @@ export default function MenuPage() {
                     </div>
 
                     {/* Menu Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full overflow-y-auto">
                         {menuItems.map((menu: Food) => (
                             <MenuCard
                                 key={menu.id}
