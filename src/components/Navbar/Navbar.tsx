@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 
@@ -25,12 +25,12 @@ const NavItem = ({ href, label }: NavItemProps) => {
 };
 
 const Navbar = () => {
+    const router = useRouter();
     const { data: session, status } = useSession();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     const navItems: NavItemProps[] = [
-        { href: '/', label: 'หน้าหลัก' },
-        { href: '/menus', label: 'เมนู' },
+        { href: '/menu', label: 'เมนู' },
         { href: '/booking', label: 'จองโต๊ะ' },
         { href: '/about', label: 'เกี่ยวกับเรา' },
     ];
@@ -51,13 +51,14 @@ const Navbar = () => {
             }
           }
         
-        await signOut({ callbackUrl: '/' });
+        await signOut( { redirect: false } );
+        router.push('/login');
     };
 
     return (
         <nav className="flex items-center justify-between px-6 py-4 bg-white shadow-sm">
             {/* Logo Section */}
-            <Link href="/" className="flex items-center">
+            <Link href="/menu" className="flex items-center">
                 <div className="mr-2">
                     <div className="w-6 h-6 border-2 border-black rounded-full" />
                 </div>

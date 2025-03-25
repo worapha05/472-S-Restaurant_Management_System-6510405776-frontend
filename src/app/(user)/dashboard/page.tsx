@@ -7,17 +7,7 @@ import Link from 'next/link';
 import OrderTable from '@/components/User/OrderTable';
 import ReservationTable from '@/components/User/ReservationTable';
 import Loading from '@/components/Loading';
-
-// Types for our data
-interface UserData {
-  address: string;
-  email: string;
-  id: string;
-  name: string;
-  phone_number: string;
-  role: string;
-  username: string;
-}
+import { User } from '@/interfaces/User';
 
 type MenuSection = 'profile' | 'orders' | 'reservations';
 
@@ -34,7 +24,7 @@ export default function ProfilePage() {
       : 'profile'
   );
   
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -217,9 +207,9 @@ export default function ProfilePage() {
       case 'profile':
         return renderProfileSection();
       case 'orders':
-        return <OrderTable userId={userData.id} />;
+        return <OrderTable userId={userData.id.toString()} />;
       case 'reservations':
-        return <ReservationTable userId={userData.id} />;
+        return <ReservationTable userId={userData.id.toString()} />;
       default:
         return renderProfileSection();
     }

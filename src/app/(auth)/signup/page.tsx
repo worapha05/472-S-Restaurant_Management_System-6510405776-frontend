@@ -141,7 +141,7 @@ export default function SignUpPage() {
           password: formData.password,
           address: fullAddress,
           phone_number: formData.phone_number,
-          role: formData.role,
+          role: 'USER',
         }),
       });
       
@@ -354,25 +354,6 @@ export default function SignUpPage() {
                       className="appearance-none block w-full px-3 py-2 border border-searchBox rounded-md shadow-sm placeholder-placeholder focus:outline-none focus:ring-2 focus:ring-inputFieldFocus focus:border-inputFieldFocus sm:text-sm"
                       placeholder="0812345678"
                     />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="role" className="block text-sm font-medium text-primary">
-                    ประเภทผู้ใช้งาน
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      id="role"
-                      name="role"
-                      value={formData.role}
-                      onChange={handleChange}
-                      className="appearance-none block w-full px-3 py-2 border border-searchBox rounded-md shadow-sm placeholder-placeholder focus:outline-none focus:ring-2 focus:ring-inputFieldFocus focus:border-inputFieldFocus bg-background sm:text-sm"
-                    >
-                      <option value="user">ลูกค้า</option>
-                      <option value="admin">ผู้ดูแลระบบ</option>
-                      <option value="editor">ผู้แก้ไข</option>
-                    </select>
                   </div>
                 </div>
 
