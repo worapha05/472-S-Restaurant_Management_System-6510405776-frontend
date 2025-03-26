@@ -27,7 +27,11 @@ export default function ShowTimeSlots() {
 
     async function getData() {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables`, {
+                headers: {
+                  'Authorization': `Bearer ${session?.user?.accessToken}`,
+                }
+              });
             if (!res.ok) {
                 throw new Error('Failed to fetch data');
             }
@@ -160,6 +164,7 @@ export default function ShowTimeSlots() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.user?.accessToken}`,
                 },
                 body: JSON.stringify(body),
             });

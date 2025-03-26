@@ -1,7 +1,9 @@
-// app/orders/[id]/page.tsx
+'use client';
+
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
 // Type definitions
 interface OrderItem {
@@ -26,7 +28,7 @@ interface Order {
   address: string | null;
   accept: string | null;
   user_id: number;
-  items?: OrderItem[]; // Order items if available in your API
+  items?: OrderItem[];
   customer?: {
     name: string;
     phone: string;
@@ -54,26 +56,6 @@ function OrderDetailLoading() {
       </div>
     </div>
   );
-}
-
-// Function to get a single order by ID
-async function getOrderById(id: string) {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/orders/${id}`);
-    
-    if (!res.ok) {
-      if (res.status === 404) {
-        return null;
-      }
-      throw new Error('Failed to fetch order data');
-    }
-    
-    const resJson = await res.json();
-    return resJson.data || null;
-  } catch (error) {
-    console.error("Error fetching order details:", error);
-    return null;
-  }
 }
 
 // Sample order items (replace with actual API data if available)
@@ -329,21 +311,104 @@ function OrderDetail({ order }: { order: Order }) {
 }
 
 // Main order detail page component
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
-  const order = await getOrderById(params.id);
+export default function OrderDetailPage({ params }: { params: { id: string } }) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  console.log('Fetched order:', order);
-  
-  
-  if (!order) {
-    notFound();
+  // Function to get a single order by ID
+  async function getOrderById(id: string, token: string) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/orders/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (!res.ok) {
+        if (res.status === 404) {
+          return null;
+        }
+        throw new Error('Failed to fetch order data');
+      }
+      
+      const resJson = await res.json();
+      return resJson.data || null;
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      throw error;
+    }
+  }
+
+  // Check for session and redirect if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  // Fetch order data once session is loaded
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.accessToken) {
+      const fetchOrder = async () => {
+        try {
+          setLoading(true);
+          const orderData = await getOrderById(params.id, session.user.accessToken);
+          
+          if (!orderData) {
+            router.push('/404');
+            return;
+          }
+          
+          setOrder(orderData);
+        } catch (err) {
+          setError("Failed to load order details. Please try again.");
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchOrder();
+    }
+  }, [params.id, session, status, router]);
+
+  // Show loading state
+  if (loading || status === 'loading') {
+    return (
+      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+        <OrderDetailLoading />
+      </div>
+    );
   }
   
-  return (
-    <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
-      <Suspense fallback={<OrderDetailLoading />}>
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+        <div className="bg-white rounded-xl p-6 text-center max-w-md">
+          <div className="text-red-500 text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2">Error Loading Order</h2>
+          <p className="text-neutral-600 mb-4">{error}</p>
+          <Link href="/orders" className="inline-block bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg">
+            Return to Orders
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  
+  // Show order details when data is loaded
+  if (order) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
         <OrderDetail order={order} />
-      </Suspense>
-    </div>
-  );
+      </div>
+    );
+  }
+  
+  // This should not be reached normally
+  return null;
 }

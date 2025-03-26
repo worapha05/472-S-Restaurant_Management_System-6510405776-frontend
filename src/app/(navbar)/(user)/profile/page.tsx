@@ -40,7 +40,12 @@ export default function ProfilePage() {
       if (status === 'authenticated' && session?.user?.id) {
         try {
           setIsLoading(true);
-          const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}`, {
+              headers: {
+                'Authorization': `Bearer ${session?.user?.accessToken}`,
+              }
+            }
+          );
 
           if (!response.ok) {
             throw new Error('Failed to fetch user data');
