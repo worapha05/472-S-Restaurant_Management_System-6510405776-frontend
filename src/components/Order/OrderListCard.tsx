@@ -1,16 +1,9 @@
 'use client';
-interface OrderListItem {
-    id: number;
-    description: string;
-    quantity: number;
-    food: {
-        name: string;
-        image_url: string;
-        price: number;
-    };
-}
 
 export default function OrderListCard({ item }: { item: OrderListItem }) {
+    // Calculate total price
+    const totalPrice = item.food.price * item.quantity;
+    
     return (
         <div className="grid grid-cols-[auto_1fr_auto_auto] justify-center items-center rounded-xl p-4 w-full shadow-xl gap-8">
             
@@ -25,7 +18,14 @@ export default function OrderListCard({ item }: { item: OrderListItem }) {
                 </div>
 
                 <div className="flex flex-col items-end justify-end">
-                    <p>${item.food.price}</p>
+                    {item.quantity > 1 ? (
+                        <>
+                            <p className="text-mainText font-medium">${totalPrice.toFixed(2)}</p>
+                            <p className="text-secondText text-sm">${item.food.price.toFixed(2)} each</p>
+                        </>
+                    ) : (
+                        <p>${item.food.price.toFixed(2)}</p>
+                    )}
                 </div>
             </div>
 
