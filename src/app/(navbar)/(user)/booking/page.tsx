@@ -5,8 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import TimeCard from "@/components/Reservation/TimeCard";
 import Table from "@/components/Reservation/TableCard";
 import Loading from "@/components/Loading";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function ShowTimeSlots() {
+    const router = useRouter();
+    const { data: session, status } = useSession();
     const [date, setDate] = useState<Date | null>(null);
     const [time, setTime] = useState<string>("");
     const [table_id, setTable_id] = useState<string>("");
@@ -45,6 +49,12 @@ export default function ShowTimeSlots() {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/login');
+        }
+    }, [status, router]);
 
     const validateDate = (selectedDate: Date): boolean => {
         const today = new Date();
@@ -138,14 +148,15 @@ export default function ShowTimeSlots() {
     async function makeReservation() {
         try {
             const appointmentTime = `${date?.getFullYear()}-${Number(date?.getMonth()) +1}-${date?.getDate()} ${String(Number(time)).padStart(2, "0")}:00:00`;
+            const user_id = session?.user.id;
             
             const body = {
-                user_id: 1, // TO DO: Get UID From Token Login User
+                user_id: user_id,
                 table_id: Number(table_id),
                 appointment_time: appointmentTime,
             };
             
-            const res = await fetch("http://localhost/api/reservations", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/reservations`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -241,7 +252,7 @@ export default function ShowTimeSlots() {
                             </p>
                             <div className="mt-6">
                                 <button 
-                                    onClick={() => window.location.href = '/dashboard'}
+                                    onClick={() => window.location.href = '/profile?section=reservations'}
                                     className="inline-flex justify-center px-6 py-3 rounded-lg bg-button text-background hover:bg-hoverButton focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-inputFieldFocus transition-colors"
                                 >
                                     ไปยังหน้ารายการจอง

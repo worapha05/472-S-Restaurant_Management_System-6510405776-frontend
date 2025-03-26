@@ -193,12 +193,17 @@ export default function ReservationList({ userId }: ReservationListProps) {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/reservations/${reservationId}/cancel`, {
+      const body = {
+        status: 'CANCELLED'
+      };
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/reservations/${reservationId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.user?.accessToken}`,
-        }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.user?.accessToken}`,
+        },
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
