@@ -176,11 +176,6 @@ export default function ReservationsPage() {
             <div className="flex flex-col gap-4 w-full max-w-5xl">
                 <div className="flex justify-between items-center w-full max-w-5xl py-12">
                     <p className="font-bold text-3xl text-mainText">รายการการจอง</p>
-                    
-                    <button className="bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg flex items-center">
-                        <span className="mr-2">+</span>
-                        เพิ่มการจอง
-                    </button>
                 </div>
 
                 {/* Filter Controls */}

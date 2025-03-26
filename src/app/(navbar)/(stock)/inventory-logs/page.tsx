@@ -347,7 +347,15 @@ const InventoryOverview: React.FC = (): JSX.Element => {
         />
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">ระบบจัดการวัตถุดิบ</h1>
+        <div className='flex justify-between p-2 my-2'>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">ระบบจัดการวัตถุดิบ</h1>
+
+            <a className="bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg flex items-center"
+                href="/create-inventory-logs">
+                <span className="mr-2">+</span>
+                เพิ่มการการรายการ
+            </a>
+        </div>
 
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">วัตถุดิบคงคลัง</h2>
