@@ -59,7 +59,7 @@ function OrderDetailLoading() {
 // Function to get a single order by ID
 async function getOrderById(id: string) {
   try {
-    const res = await fetch(`http://omnidine-backend-laravel.test-1/api/orders/${id}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/orders/${id}`);
     
     if (!res.ok) {
       if (res.status === 404) {

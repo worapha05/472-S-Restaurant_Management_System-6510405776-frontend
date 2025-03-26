@@ -7,13 +7,15 @@ services:
       - "7070:3000"
     volumes:
       - .:/app
-      # Persist node_modules to avoid unnecessary npm installs
+      # Persist node_modules to avoid unnecessary reinstalls
       - node_modules:/app/node_modules
       # Persist Next.js build cache
       - .next:/app/.next
     environment:
       - NODE_ENV=development
-    command: bun run dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: yarn dev 
     networks:
       - omnidine
 
@@ -23,5 +25,4 @@ networks:
     external: true
 
 volumes:
-  # Named volume for node_modules to persist between restarts
   node_modules:

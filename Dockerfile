@@ -1,12 +1,15 @@
-FROM oven/bun:1
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package.json first
-COPY package.json ./
+# Install yarn if not included in the base image
+RUN apk add --no-cache yarn
 
-# Install dependencies using bun
-RUN bun install
+# Copy package files and lockfile
+COPY package.json yarn.lock* ./
+
+# Install dependencies using yarn
+RUN yarn install --frozen-lockfile
 
 # Copy the rest of the application
 COPY . .
@@ -14,5 +17,5 @@ COPY . .
 # Expose port 3000
 EXPOSE 3000
 
-# Start the application in development mode
-CMD ["bun", "run", "dev"]
+# Make sure Next.js binds to all interfaces
+CMD ["yarn", "dev,]

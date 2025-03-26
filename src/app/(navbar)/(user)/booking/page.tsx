@@ -23,7 +23,7 @@ export default function ShowTimeSlots() {
 
     async function getData() {
         try {
-            const res = await fetch(`http://localhost/api/tables`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables`);
             if (!res.ok) {
                 throw new Error('Failed to fetch data');
             }

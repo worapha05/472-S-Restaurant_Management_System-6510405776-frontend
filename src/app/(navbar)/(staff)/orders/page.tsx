@@ -1,7 +1,7 @@
 import OrderCard from "@/components/Order/OrderCard";
 
 async function getData() {
-    const res = await fetch("http:///omnidine-backend-laravel.test-1/api/orders");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/orders`);
     
     // console.log("Response Status:", res.status); // Logs status code
     // console.log("Response Headers:", res.headers); // Logs headers
