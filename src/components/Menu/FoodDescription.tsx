@@ -9,15 +9,15 @@ interface CartList {
 
 const FoodDescription = ({ food }: { food: Food }) => {
     const [quantity, setQuantity] = useState(1);
-    
+
     const increaseQuantity = () => {
         setQuantity(prev => prev + 1);
     };
-    
+
     const decreaseQuantity = () => {
         setQuantity(prev => prev > 1 ? prev - 1 : 1);
     };
-    
+
     const addToCart = () => {
         // Add the item to the cart
         const cart = JSON.parse(localStorage.getItem("cart") || "[]") as CartList[];
@@ -39,7 +39,7 @@ const FoodDescription = ({ food }: { food: Food }) => {
     };
 
     return (
-        <div className="flex flex-col w-full p-6 md:p-8 h-full bg-background">
+        <div className="flex flex-col gap-6 w-full p-10 h-full right-0 sticky shadow-md bg-background">
             <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
                 {/* image - more constrained size */}
                 <div className="w-full mb-6 flex justify-center">
@@ -64,11 +64,11 @@ const FoodDescription = ({ food }: { food: Food }) => {
                 <div className="w-full max-w-xs mb-4">
                     <span className="text-lg font-semibold">฿ {food.price}</span>
                 </div>
-                
+
                 {/* quantity selector and add to cart */}
                 <div className="flex items-center justify-between w-full max-w-xs mb-6">
                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-                        <button 
+                        <button
                             className="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition-colors"
                             onClick={decreaseQuantity}
                             type="button"
@@ -76,7 +76,7 @@ const FoodDescription = ({ food }: { food: Food }) => {
                             -
                         </button>
                         <span className="px-4 py-1 text-center min-w-[40px]">{quantity}</span>
-                        <button 
+                        <button
                             className="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition-colors"
                             onClick={increaseQuantity}
                             type="button"
@@ -84,7 +84,7 @@ const FoodDescription = ({ food }: { food: Food }) => {
                             +
                         </button>
                     </div>
-                    
+
                     <button
                         className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors flex items-center"
                         onClick={addToCart}

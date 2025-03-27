@@ -12,7 +12,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: (food: Foo
     const addToCart = (e: React.MouseEvent) => {
         // Prevent default form submission
         e.preventDefault();
-        
+
         // Add the item to the cart
         const cart = JSON.parse(localStorage.getItem("cart") || "[]") as CartList[];
 
@@ -42,12 +42,12 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: (food: Foo
                 />
                 <div className="absolute top-4 left-4">
                     <span className="text-xs tracking-wider text-gray-600">
-                        {menu.category}
+                        {menu.category.toUpperCase()}
                     </span>
                 </div>
                 <div className="absolute bottom-4 right-4">
                     <span className="text-xs tracking-wider text-gray-600">
-                        {menu.status}
+                        {menu.status.toUpperCase()}
                     </span>
                 </div>
             </div>
@@ -78,7 +78,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: (food: Foo
                 {/* add to cart button on the right, price on the left*/}
                 <div className="flex items-center justify-between mt-4">
                     <span className="text-lg font-semibold">฿ {menu.price}</span>
-                    <button 
+                    <button
                         className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
                         onClick={addToCart}
                         type="button"

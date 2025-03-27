@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import MenuCard from "@/components/Menu/MenuCard";
 import Link from "next/link";
@@ -23,6 +23,8 @@ export default function MenuPage() {
     const [selectedFood, setSelectedFood] = useState<Food>(defaultFood);
     const [isLoading, setIsLoading] = useState(true);
     const [showDescription, setShowDescription] = useState(false);
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const menuGridRef = useRef<HTMLDivElement>(null);
 
     // Fetch menu data when component mounts
     useEffect(() => {
@@ -34,18 +36,19 @@ export default function MenuPage() {
                     throw new Error('Failed to fetch data');
                 }
                 const resJson = await res.json();
-                
+
                 // Ensure the API response format matches our Food type
                 if (resJson.data && Array.isArray(resJson.data)) {
                     const parsedFoods: Food[] = resJson.data.map((item: any) => ({
                         id: item.id,
                         name: item.name || '',
                         price: parseFloat(item.price) || 0,
-                        status: item.status || 'UNAVAILABLE',
-                        category: item.category || 'MAIN COURSE',
+                        status: item.status.toUpperCase() || 'UNAVAILABLE',
+                        category: item.category.toUpperCase() || 'MAIN COURSE',
                         description: item.description || '',
                         image_url: item.image_url || 'https://placehold.co/600x400/png'
-                    }));
+                    })).filter((item: Food) => item.status !== 'UNAVAILABLE');
+
                     setMenuItems(parsedFoods);
                 }
             } catch (error) {
@@ -58,10 +61,36 @@ export default function MenuPage() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            if (menuGridRef.current) {
+                const scrollTop = menuGridRef.current.scrollTop;
+                setShowScrollButton(scrollTop > 100); // Reduced threshold for earlier appearance
+            }
+        };
+
+        const menuGrid = menuGridRef.current;
+        if (menuGrid) {
+            menuGrid.addEventListener('scroll', handleScroll);
+            // Initial check
+            handleScroll();
+        }
+
+        return () => {
+            if (menuGrid) {
+                menuGrid.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, []);
+
+    const scrollToTop = () => {
+        menuGridRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     function selectFood(foodId: number) {
         // Find the complete food object from the menuItems array using the ID
         const foundFood = menuItems.find(item => item.id === foodId);
-        
+
         if (foundFood) {
             setSelectedFood(foundFood);
             setShowDescription(true);
@@ -79,28 +108,28 @@ export default function MenuPage() {
 
     return (
         <>
-            <div className="flex flex-col justify-center w-full min-h-[calc(100vh-64px)] overflow-x-hidden">
-                <div className="w-full px-4 md:px-8 lg:px-16">
+            <div className="flex flex-row justify-center w-full h-[calc(100vh-64px)] overflow-x-hidden relative">
+                <div className="w-full mx-16">
                     {/* Header and nav content */}
                     <div className="flex items-center justify-between w-full">
-                        <p className="font-bold text-2xl md:text-3xl w-full max-w-5xl py-8 md:py-12">รายการอาหาร</p>
+                        <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
                         <Link href="/cart" className="flex items-center justify-center p-2 rounded-xl bg-primary hover:bg-primary-dark transition-colors">
                             {/* Cart icon */}
-                            <svg className="w-6 h-6 md:w-8 md:h-8 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-8 h-8 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                 <path fillRule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clipRule="evenodd" />
                             </svg>
-                            <p className="font-bold text-white text-center no-wrap ml-2">ตะกร้า</p>
+                            <p className="font-bold text-white w-full text-center no-wrap">ตะกร้า</p>
                         </Link>
                     </div>
 
                     {/* Category Navigation */}
-                    <div className="w-full mb-8 overflow-x-auto">
-                        <nav className="flex gap-4 md:gap-8 border-b border-gray-200 min-w-max">
+                    <div className="w-full mb-8">
+                        <nav className="flex gap-8 border-b border-gray-200">
                             {['ALL', 'APPETIZER', 'ENTREE', 'MAIN COURSE', 'DESSERT', 'DRINKS'].map((category) => (
                                 <Link
                                     key={category}
                                     href={`?${new URLSearchParams({ category })}`}
-                                    className={`pb-4 text-sm border-b-2 transition-colors whitespace-nowrap ${selectedCategory === category
+                                    className={`pb-4 text-sm border-b-2 transition-colors ${selectedCategory === category
                                         ? 'text-black border-black font-semibold'
                                         : 'text-gray-600 hover:text-gray-900 border-transparent hover:border-black'
                                         }`}
@@ -112,7 +141,7 @@ export default function MenuPage() {
                     </div>
 
                     {/* Menu Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full pb-16">
+                    <div ref={menuGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full pb-5 overflow-y-auto max-h-[calc(100vh-300px)]">
                         {isLoading ? (
                             // Skeleton loading UI
                             Array(8).fill(0).map((_, index) => (
@@ -145,25 +174,24 @@ export default function MenuPage() {
                     </div>
                 </div>
 
-                {/* Food description modal/overlay */}
-                {showDescription && selectedFood.id !== 0 && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
-                        <div className="bg-white rounded-lg shadow-xl w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-auto relative animate-fadeIn">
-                            {/* Close button */}
-                            <button 
-                                onClick={closeDescription} 
-                                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 z-10"
-                                aria-label="Close"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            
-                            <FoodDescription food={selectedFood} />
-                        </div>
-                    </div>
+                {/* Scroll to top button */}
+                {showScrollButton && (
+                    <button
+                        className={`fixed z-10 bottom-8 right-8 px-2 py-2 rounded-full bg-primary hover:bg-secondary text-white font-medium shadow-md hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg transition-all duration-150 ease-in-out ${showScrollButton ? 'opacity-100' : 'opacity-0'}`}
+                        onClick={scrollToTop}
+                        type="button"
+                        aria-label="Scroll to top"
+                    >
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </button>
                 )}
+
+                {/* Food description pane */}
+                <div className="sticky top-0.5 w-3/6 h-full -z-10">
+                    <FoodDescription food={selectedFood} />
+                </div>
             </div>
         </>
     );
