@@ -129,7 +129,7 @@ export default function FoodsPage() {
             <div key={item.id} className="border rounded-lg overflow-hidden shadow-md">
               <div className="relative h-48 w-full overflow-hidden">
                 <img
-                  src={item.image_url}
+                  src={`${process.env.NEXT_PUBLIC_S3_URL}/${item.image_url}`}
                   alt={item.name}
                   className="w-full h-full object-cover"
                 />

@@ -46,7 +46,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void
         <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
             <div className="aspect-square relative overflow-hidden">
                 <img
-                    src={menu.image_url}
+                    src={`${process.env.NEXT_PUBLIC_S3_URL}/${menu.image_url}`}
                     alt={menu.name}
                     className="object-cover w-full h-full"
                 />

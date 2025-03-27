@@ -66,7 +66,7 @@ export default async function FoodPage({ params }: { params: { id: string } }) {
                     {/* Image Section */}
                     <div className="flex-shrink-0">
                         <img
-                            src={food.image_url}
+                            src={`${process.env.NEXT_PUBLIC_S3_URL}/${food.image_url}`}
                             alt={food.name}
                             className="w-64 h-64 object-cover rounded-lg shadow-md"
                         />

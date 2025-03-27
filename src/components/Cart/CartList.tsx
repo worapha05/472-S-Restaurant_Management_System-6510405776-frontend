@@ -90,7 +90,7 @@ export default function CartList({ item, onCartUpdate }: CartListProps) {
                 {/* Food Image */}
                 <div className="relative">
                     <img 
-                        src={item.food.image_url} 
+                        src={`${process.env.NEXT_PUBLIC_S3_URL}/${item.food.image_url}`} 
                         alt={item.food.name} 
                         className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover bg-primary"
                     />

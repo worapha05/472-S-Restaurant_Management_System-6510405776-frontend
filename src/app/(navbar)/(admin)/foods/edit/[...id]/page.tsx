@@ -190,7 +190,7 @@ export default function EditFoodPage() {
 
     // Function to handle the image URL after upload
     const handleImageUpload = (uploadedUrl: string) => {
-        const fullUrl = `${process.env.NEXT_PUBLIC_S3_URL}${uploadedUrl}`;
+        const fullUrl = `${uploadedUrl}`;
         setFormData(prev => ({
             ...prev,
             image_url: fullUrl
@@ -320,7 +320,7 @@ export default function EditFoodPage() {
                                     รูปภาพถูกอัปโหลดแล้ว
                                 </p>
                                 <img 
-                                    src={formData.image_url} 
+                                    src={`${process.env.NEXT_PUBLIC_S3_URL}/${formData.image_url}`} 
                                     alt={formData.name} 
                                     className="w-32 h-32 object-cover rounded-md"
                                 />
