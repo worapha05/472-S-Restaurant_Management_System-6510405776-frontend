@@ -1,9 +1,9 @@
-'use client';
-
-import { useSession } from 'next-auth/react';
+// app/orders/[id]/page.tsx
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import OrderActions from '@/components/Order/OrderActions';
+import OrderStatusHistory from '@/components/Order/OrderStatusHistory';
 
 // Type definitions
 interface OrderItem {
@@ -11,8 +11,17 @@ interface OrderItem {
   name: string;
   quantity: number;
   price: number;
-  options?: string[];
-  notes?: string;
+  description?: string;
+}
+
+interface OrderList {
+  id: number;
+  quantity: number;
+  price: number;
+  description?: string;
+  food: {
+    name: string;
+  };
 }
 
 interface Order {
@@ -28,10 +37,11 @@ interface Order {
   address: string | null;
   accept: string | null;
   user_id: number;
-  items?: OrderItem[];
-  customer?: {
+  items?: OrderItem[]; // Order items if available in your API
+  order_lists: OrderList[];
+  user?: {
     name: string;
-    phone: string;
+    phone_number: string;
   };
 }
 
@@ -58,10 +68,30 @@ function OrderDetailLoading() {
   );
 }
 
+// Function to get a single order by ID
+async function getOrderById(id: string) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/orders/${id}`);
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch order data');
+    }
+
+    const resJson = await res.json();
+    return resJson.data || null;
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    return null;
+  }
+}
+
 // Sample order items (replace with actual API data if available)
-const sampleItems: OrderItem[] = [
-  { id: 1, name: 'ข้าวผัดกระเพรา', quantity: 2, price: 120, options: ['ไข่ดาว', 'พิเศษ'], notes: 'เผ็ดน้อย' },
-  { id: 2, name: 'ส้มตำไทย', quantity: 1, price: 80, options: ['ไม่ใส่ปลาร้า'] },
+const defaultItems: OrderItem[] = [
+  { id: 1, name: 'ข้าวผัดกระเพรา', quantity: 2, price: 120, description: 'เผ็ดน้อย' },
+  { id: 2, name: 'ส้มตำไทย', quantity: 1, price: 80, description: 'ไม่ใส่ปลาร้า' },
   { id: 3, name: 'น้ำเปล่า', quantity: 3, price: 45 }
 ];
 
@@ -92,67 +122,37 @@ function formatPaymentMethod(method: string) {
 function getStatusColor(status: string): string {
   switch (status.toUpperCase()) {
     case 'PENDING': return 'bg-orange-100 text-orange-700';
-    case 'IN_PROGRESS': return 'bg-primary-100 text-primary-700';
+    case 'IN_PROGRESS': return 'bg-orange-100 text-orange-700';
     case 'COMPLETED': return 'bg-green-100 text-green-700';
     case 'CANCELLED': return 'bg-red-100 text-red-700';
     default: return 'bg-gray-100 text-gray-700';
   }
 }
 
-// Order status history component (placeholder)
-function OrderStatusHistory() {
-  const statuses = [
-    { status: 'PENDING', date: '2025-03-02T16:45:30Z', note: 'รับออเดอร์' },
-    { status: 'IN_PROGRESS', date: '2025-03-02T16:50:45Z', note: 'กำลังจัดเตรียมอาหาร' },
-    { status: 'CANCELLED', date: '2025-03-02T17:10:20Z', note: 'ลูกค้ายกเลิก: สั่งอาหารผิด' }
-  ];
-
-  return (
-    <div className="space-y-4">
-      {statuses.map((statusItem, index) => (
-        <div key={index} className="flex items-start">
-          <div className="mr-4 relative">
-            <div className={`w-4 h-4 rounded-full mt-1 ${getStatusColor(statusItem.status).split(' ')[0].replace('bg-', 'bg-')}`}></div>
-            {index < statuses.length - 1 && (
-              <div className="absolute top-5 bottom-0 left-2 w-0.5 -ml-px h-full bg-neutral-200"></div>
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between">
-              <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(statusItem.status)}`}>
-                {statusItem.status}
-              </span>
-              <time className="text-sm text-neutral-500">
-                {formatDate(statusItem.date)}
-              </time>
-            </div>
-            <p className="mt-1 text-sm">{statusItem.note}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // Order detail content component
 function OrderDetail({ order }: { order: Order }) {
   // Use sample items if no items in order data
-  const orderItems = order.items || sampleItems;
-  
+  const orderItems = order.order_lists || defaultItems;
+
   // Calculate subtotal and tax (assuming 7% VAT)
   const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.07;
-  
+  // const tax = subtotal * 0.07;
+
   return (
     <div className="w-full max-w-5xl">
       {/* Header with back button and actions */}
       <div className="flex justify-between items-center mb-6">
-        <Link href="/orders" className="flex items-center text-primary-600 hover:text-primary-700">
-          <span className="material-symbols-outlined mr-1">arrow_back</span>
+        <Link
+          href="/profile?section=orders"
+          className="flex flex-row items-center gap-3 text-primary-600 hover:text-primary-700"
+        >
+          <svg width="1.5rem" height="1.5rem" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 17L3 12M3 12L8 7M3 12H21" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           กลับไปยังรายการคำสั่งซื้อ
         </Link>
-        
-        <div className="flex gap-2">
+
+        {/* <div className="flex gap-2">
           <button className="bg-white hover:bg-neutral-100 px-4 py-2 rounded-lg border border-neutral-200 flex items-center">
             <span className="material-symbols-outlined mr-2">print</span>
             พิมพ์
@@ -163,9 +163,9 @@ function OrderDetail({ order }: { order: Order }) {
               แก้ไข
             </button>
           )}
-        </div>
+        </div> */}
       </div>
-      
+
       {/* Order Status Card */}
       <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-6">
         <div className="p-6">
@@ -180,46 +180,47 @@ function OrderDetail({ order }: { order: Order }) {
               {order.status}
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-neutral-200 pt-6">
+
             <div>
               <h3 className="text-sm font-medium text-neutral-500 mb-1">ประเภท</h3>
               <p className="font-medium">{order.type}</p>
             </div>
-            
+
             <div>
               <h3 className="text-sm font-medium text-neutral-500 mb-1">โต๊ะ</h3>
               <p className="font-medium">{order.table_id ? `โต๊ะที่ ${order.table_id}` : 'ไม่มีโต๊ะ'}</p>
             </div>
-            
+
             <div>
               <h3 className="text-sm font-medium text-neutral-500 mb-1">วิธีการชำระเงิน</h3>
               <p className="font-medium">{formatPaymentMethod(order.payment_method)}</p>
             </div>
-            
+
             {order.type === 'DELIVERY' && order.address && (
               <div className="col-span-1 md:col-span-3">
                 <h3 className="text-sm font-medium text-neutral-500 mb-1">ที่อยู่จัดส่ง</h3>
                 <p className="whitespace-pre-line">{order.address}</p>
               </div>
             )}
-            
-            {order.customer && (
+
+            {order.user && (
               <div className="col-span-1 md:col-span-3">
                 <h3 className="text-sm font-medium text-neutral-500 mb-1">ข้อมูลลูกค้า</h3>
-                <p>{order.customer.name}</p>
-                <p>{order.customer.phone}</p>
+                <p>{order.user.name}</p>
+                <p>TEL. {order.user.phone_number}</p>
               </div>
             )}
           </div>
         </div>
       </div>
-      
+
       {/* Order Items */}
       <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-6">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">รายการอาหาร</h2>
-          
+
           <div className="border-b border-neutral-200 pb-4 mb-4">
             {orderItems.map((item, index) => (
               <div key={index} className="flex justify-between py-3 border-b border-neutral-100 last:border-0">
@@ -227,12 +228,9 @@ function OrderDetail({ order }: { order: Order }) {
                   <div className="flex items-start">
                     <span className="font-medium text-lg">{item.quantity} x</span>
                     <div className="ml-2">
-                      <h4 className="font-medium">{item.name}</h4>
-                      {item.options && item.options.length > 0 && (
-                        <p className="text-sm text-neutral-500">{item.options.join(', ')}</p>
-                      )}
-                      {item.notes && (
-                        <p className="text-sm text-neutral-500 italic">หมายเหตุ: {item.notes}</p>
+                      <h4 className="font-medium">{item.food.name}</h4>
+                      {item.description && (
+                        <p className="text-sm text-neutral-500 italic">หมายเหตุ: {item.description}</p>
                       )}
                     </div>
                   </div>
@@ -251,7 +249,7 @@ function OrderDetail({ order }: { order: Order }) {
               </div>
             ))}
           </div>
-          
+
           {/* Order Summary */}
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -263,152 +261,48 @@ function OrderDetail({ order }: { order: Order }) {
                 }).format(subtotal)} ฿
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-500">ภาษีมูลค่าเพิ่ม (7%)</span>
-              <span>
-                {new Intl.NumberFormat('th-TH', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }).format(tax)} ฿
-              </span>
-            </div>
             <div className="flex justify-between pt-2 border-t border-neutral-200">
               <span className="font-bold">รวมทั้งสิ้น</span>
               <span className="font-bold text-xl text-primary-600">
                 {new Intl.NumberFormat('th-TH', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
-                }).format(order.sum_price)} ฿
+                }).format(subtotal)} ฿
               </span>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Order History */}
       <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-6">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-4">ประวัติสถานะ</h2>
-          <OrderStatusHistory />
+          <OrderStatusHistory order={order} />
         </div>
       </div>
-      
-      {/* Action Buttons for Order Management */}
-      {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
-        <div className="flex justify-end gap-3 my-6">
-          <button className="bg-white hover:bg-neutral-100 px-6 py-2 rounded-lg border border-red-500 text-red-500 hover:text-red-600 flex items-center">
-            <span className="material-symbols-outlined mr-2">cancel</span>
-            ยกเลิกออเดอร์
-          </button>
-          <button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg flex items-center">
-            <span className="material-symbols-outlined mr-2">check_circle</span>
-            {order.status === 'PENDING' ? 'รับออเดอร์' : 'เสร็จสิ้นออเดอร์'}
-          </button>
-        </div>
-      )}
+
+      <OrderActions orderId={order.id} status={order.status} />
     </div>
   );
 }
 
 // Main order detail page component
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+  const order = await getOrderById(params.id);
 
-  // Function to get a single order by ID
-  async function getOrderById(id: string, token: string) {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/orders/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-      
-      if (!res.ok) {
-        if (res.status === 404) {
-          return null;
-        }
-        throw new Error('Failed to fetch order data');
-      }
-      
-      const resJson = await res.json();
-      return resJson.data || null;
-    } catch (error) {
-      console.error("Error fetching order details:", error);
-      throw error;
-    }
+  console.log('Fetched order:', order);
+
+
+  if (!order) {
+    notFound();
   }
 
-  // Check for session and redirect if not authenticated
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  // Fetch order data once session is loaded
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user?.accessToken) {
-      const fetchOrder = async () => {
-        try {
-          setLoading(true);
-          const orderData = await getOrderById(params.id, session.user.accessToken);
-          
-          if (!orderData) {
-            router.push('/404');
-            return;
-          }
-          
-          setOrder(orderData);
-        } catch (err) {
-          setError("Failed to load order details. Please try again.");
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      
-      fetchOrder();
-    }
-  }, [params.id, session, status, router]);
-
-  // Show loading state
-  if (loading || status === 'loading') {
-    return (
-      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
-        <OrderDetailLoading />
-      </div>
-    );
-  }
-  
-  // Show error state
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
-        <div className="bg-white rounded-xl p-6 text-center max-w-md">
-          <div className="text-red-500 text-5xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold mb-2">Error Loading Order</h2>
-          <p className="text-neutral-600 mb-4">{error}</p>
-          <Link href="/orders" className="inline-block bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg">
-            Return to Orders
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  
-  // Show order details when data is loaded
-  if (order) {
-    return (
-      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+  return (
+    <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+      <Suspense fallback={<OrderDetailLoading />}>
         <OrderDetail order={order} />
-      </div>
-    );
-  }
-  
-  // This should not be reached normally
-  return null;
+      </Suspense>
+    </div>
+  );
 }

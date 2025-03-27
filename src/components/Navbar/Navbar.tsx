@@ -56,8 +56,8 @@ const Navbar = () => {
         { href: '/orders', label: 'ออเดอร์' },
         { href: '/reservations', label: 'การจอง' },
         { href: '/foods', label: 'จัดการเมนูอาหาร' },
-        { href: '/stock', label: 'สต็อก' },
-        { href: '/inventory-logs', label: 'ประวัติเข้า-ออกสต๊อก' },
+        { href: '/stock', label: 'จัดการวัตถุดิบ' },
+        { href: '/inventory-logs', label: 'จัดการประวัติการนำเข้า/ออกวัตถุดิบ' },
     ];
 
     // Select the appropriate nav items based on role
