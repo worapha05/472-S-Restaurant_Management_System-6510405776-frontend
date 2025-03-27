@@ -61,13 +61,13 @@ export default async function FoodPage({ params }: { params: { id: string } }) {
                         <h2 className="text-2xl font-semibold text-gray-800">{food.name}</h2>
                         <p className="text-lg text-gray-600">{food.category.toUpperCase()}</p>
 
-                        <p className="text-xl font-bold text-primary mt-4">{`฿${Number(food.price).toFixed(2)}`}</p>
+                        <p className="text-xl font-bold text-primary mt-4">{`฿${Number(food.price)}`}</p>
 
                         <p className="text-sm text-gray-600 mt-4">{food.description}</p>
 
                         <p
                             className={`mt-4 text-white py-1 px-3 rounded-full ${
-                                food.status === "available" ? "bg-green-500" : "bg-red-500"
+                                food.status === "AVAILABLE" ? "bg-green-500" : "bg-red-500"
                             }`}
                         >
                             {food.status}
