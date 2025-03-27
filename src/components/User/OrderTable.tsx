@@ -3,15 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-
-interface Order {
-  id: string;
-  created_at: string;
-  sum_price: number;
-  status: string;
-  type: string;
-}
-
 interface OrderListProps {
   userId?: string;
 }

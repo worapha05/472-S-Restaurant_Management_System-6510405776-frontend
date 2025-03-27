@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface UploadResponse {
   success: boolean;
@@ -9,12 +10,14 @@ interface UploadResponse {
   message?: string;
 }
 
-const StandaloneMinioUploader = () => {
+const StandaloneMinioUploader = ({ onImageUpload }: { onImageUpload: (uploadedUrl: string) => void }) => {
+  const { data: session } = useSession();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -38,24 +41,32 @@ const StandaloneMinioUploader = () => {
     setSelectedFile(files[0]);
     setError(null);
     setUploadedUrl(null);
+    setUploadSuccessMessage(null);
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
+    
+    // Check if user is authenticated with a token
+    if (!session?.user?.accessToken) {
+      setError('You need to be logged in to upload files');
+      return;
+    }
 
     setUploading(true);
     setError(null);
 
     try {
-      // Create a FormData object to send the file
       const formData = new FormData();
       formData.append('file', selectedFile);
       
-      // Send the file directly to your backend for uploading
+      // Send the file to the server with authorization token
       const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/upload`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.user.accessToken}`
+        },
         body: formData,
-        // No need to set Content-Type, it will be set automatically with the correct boundary
       });
 
       const data: UploadResponse = await response.json();
@@ -64,14 +75,14 @@ const StandaloneMinioUploader = () => {
         throw new Error(data.message || 'Upload failed');
       }
 
-      // Store and log the uploaded URL
+      onImageUpload(data.fileUrl);
+
+      setUploadSuccessMessage("อัปโหลดรูปภาพสำเร็จ!");
       setUploadedUrl(data.fileUrl);
-      console.log('Upload successful! File URL:', data.fileUrl);
       
       setSelectedFile(null);
     } catch (err: any) {
       setError(err.message || 'Upload failed');
-      console.error('Upload error:', err);
     } finally {
       setUploading(false);
     }
@@ -104,6 +115,10 @@ const StandaloneMinioUploader = () => {
 
       {error && (
         <div className="text-red-500 mb-3">{error}</div>
+      )}
+
+      {uploadSuccessMessage && (
+        <div className="text-green-500 mb-3">{uploadSuccessMessage}</div>
       )}
 
       {uploadedUrl && (

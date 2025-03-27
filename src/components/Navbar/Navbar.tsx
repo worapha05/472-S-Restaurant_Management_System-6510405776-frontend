@@ -47,6 +47,9 @@ const Navbar = () => {
     const staffNavItems: NavItemProps[] = [
         { href: '/orders', label: 'จัดการออเดอร์' },
         { href: '/reservations', label: 'จัดการการจอง' },
+        { href: '/foods', label: 'จัดการเมนูอาหาร' },
+        { href: '/stock', label: 'สต็อก' },
+        { href: '/inventory-logs', label: 'ประวัติเข้า-ออกสต๊อก' },
     ];
 
     const ownerNavItems: NavItemProps[] = [
@@ -54,6 +57,9 @@ const Navbar = () => {
         { href: '/orders', label: 'ออเดอร์' },
         { href: '/reservations', label: 'การจอง' },
         { href: '/menu', label: 'จัดการเมนู' },
+        { href: '/foods', label: 'จัดการเมนูอาหาร' },
+        { href: '/stock', label: 'สต็อก' },
+        { href: '/inventory-logs', label: 'ประวัติเข้า-ออกสต๊อก' },
     ];
 
     // Select the appropriate nav items based on role
@@ -213,6 +219,27 @@ const Navbar = () => {
                                         >
                                             จัดการการจอง
                                         </Link>
+                                        <Link 
+                                            href="/foods" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            จัดการเมนูอาหาร
+                                        </Link>
+                                        <Link 
+                                            href="/stock" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            สต๊อก
+                                        </Link>
+                                        <Link 
+                                            href="/inventory-logs" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            ประวัติเข้า-ออกสต๊อก
+                                        </Link>
                                     </>
                                 )}
                                 
@@ -226,18 +253,32 @@ const Navbar = () => {
                                             แดชบอร์ด
                                         </Link>
                                         <Link 
-                                            href="/reports" 
+                                            href="/orders" 
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
-                                            รายงาน
+                                            ออเดอร์
                                         </Link>
                                         <Link 
-                                            href="/settings" 
+                                            href="/reservations" 
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
-                                            ตั้งค่า
+                                            การจอง
+                                        </Link>
+                                        <Link 
+                                            href="/stock" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            สต๊อก
+                                        </Link>
+                                        <Link 
+                                            href="/inventory-logs" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            ประวัติเข้า-ออกสต๊อก
                                         </Link>
                                     </>
                                 )}
