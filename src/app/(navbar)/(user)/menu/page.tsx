@@ -6,17 +6,7 @@ import MenuCard from "@/components/Menu/MenuCard";
 import Link from "next/link";
 import FoodDescription from "@/components/Menu/FoodDescription";
 
-type Food = {
-    id: number;
-    name: string;
-    price: number;
-    status: "AVAILABLE" | "UNAVAILABLE";
-    category: 'APPETIZER' | 'ENTREE' | 'MAIN COURSE' | 'DESSERT' | 'DRINK';
-    description: string;
-    image_url: string;
-}
-
-const selectedFood: Food = {
+const defaultFood: Food = {
     id: 0,
     name: 'NULL',
     price: 0,
@@ -26,17 +16,16 @@ const selectedFood: Food = {
     image_url: 'https://placehold.co/600x400/png'
 }
 
-// Convert to client component
 export default function MenuPage() {
     const searchParams = useSearchParams();
     const selectedCategory = searchParams.get('category') || 'ALL';
     const [menuItems, setMenuItems] = useState<Food[]>([]);
-    const [food, setFood] = useState<Food>(selectedFood);
+    const [selectedFood, setSelectedFood] = useState<Food>(defaultFood);
     const [isLoading, setIsLoading] = useState(true);
+    const [showDescription, setShowDescription] = useState(false);
 
-    // fetch data when component mounts
+    // Fetch menu data when component mounts
     useEffect(() => {
-
         async function fetchData() {
             setIsLoading(true);
             try {
@@ -45,7 +34,20 @@ export default function MenuPage() {
                     throw new Error('Failed to fetch data');
                 }
                 const resJson = await res.json();
-                setMenuItems(resJson.data || []);
+                
+                // Ensure the API response format matches our Food type
+                if (resJson.data && Array.isArray(resJson.data)) {
+                    const parsedFoods: Food[] = resJson.data.map((item: any) => ({
+                        id: item.id,
+                        name: item.name || '',
+                        price: parseFloat(item.price) || 0,
+                        status: item.status || 'UNAVAILABLE',
+                        category: item.category || 'MAIN COURSE',
+                        description: item.description || '',
+                        image_url: item.image_url || 'https://placehold.co/600x400/png'
+                    }));
+                    setMenuItems(parsedFoods);
+                }
             } catch (error) {
                 console.error("Error fetching menu items:", error);
             } finally {
@@ -56,9 +58,19 @@ export default function MenuPage() {
         fetchData();
     }, []);
 
-    function selectFood(food: Food) {
-        setFood(food);
-        localStorage.setItem("selectedFood", JSON.stringify(food));
+    function selectFood(foodId: number) {
+        // Find the complete food object from the menuItems array using the ID
+        const foundFood = menuItems.find(item => item.id === foodId);
+        
+        if (foundFood) {
+            setSelectedFood(foundFood);
+            setShowDescription(true);
+            localStorage.setItem("selectedFood", JSON.stringify(foundFood));
+        }
+    }
+
+    function closeDescription() {
+        setShowDescription(false);
     }
 
     const filteredMenuItems = selectedCategory === 'ALL'
@@ -67,28 +79,28 @@ export default function MenuPage() {
 
     return (
         <>
-            <div className="flex flex-row justify-center w-full h-[calc(100vh-64px)] overflow-x-hidden">
-                <div className="w-full mx-16">
+            <div className="flex flex-col justify-center w-full min-h-[calc(100vh-64px)] overflow-x-hidden">
+                <div className="w-full px-4 md:px-8 lg:px-16">
                     {/* Header and nav content */}
                     <div className="flex items-center justify-between w-full">
-                        <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
+                        <p className="font-bold text-2xl md:text-3xl w-full max-w-5xl py-8 md:py-12">รายการอาหาร</p>
                         <Link href="/cart" className="flex items-center justify-center p-2 rounded-xl bg-primary hover:bg-primary-dark transition-colors">
                             {/* Cart icon */}
-                            <svg className="w-8 h-8 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 md:w-8 md:h-8 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                 <path fillRule="evenodd" d="M4 4a1 1 0 0 1 1-1h1.5a1 1 0 0 1 .979.796L7.939 6H19a1 1 0 0 1 .979 1.204l-1.25 6a1 1 0 0 1-.979.796H9.605l.208 1H17a3 3 0 1 1-2.83 2h-2.34a3 3 0 1 1-4.009-1.76L5.686 5H5a1 1 0 0 1-1-1Z" clipRule="evenodd" />
                             </svg>
-                            <p className="font-bold text-white w-full text-center no-wrap">ตะกร้า</p>
+                            <p className="font-bold text-white text-center no-wrap ml-2">ตะกร้า</p>
                         </Link>
                     </div>
 
                     {/* Category Navigation */}
-                    <div className="w-full mb-8">
-                        <nav className="flex gap-8 border-b border-gray-200">
+                    <div className="w-full mb-8 overflow-x-auto">
+                        <nav className="flex gap-4 md:gap-8 border-b border-gray-200 min-w-max">
                             {['ALL', 'APPETIZER', 'ENTREE', 'MAIN COURSE', 'DESSERT', 'DRINKS'].map((category) => (
                                 <Link
                                     key={category}
                                     href={`?${new URLSearchParams({ category })}`}
-                                    className={`pb-4 text-sm border-b-2 transition-colors ${selectedCategory === category
+                                    className={`pb-4 text-sm border-b-2 transition-colors whitespace-nowrap ${selectedCategory === category
                                         ? 'text-black border-black font-semibold'
                                         : 'text-gray-600 hover:text-gray-900 border-transparent hover:border-black'
                                         }`}
@@ -100,7 +112,7 @@ export default function MenuPage() {
                     </div>
 
                     {/* Menu Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full pb-16">
                         {isLoading ? (
                             // Skeleton loading UI
                             Array(8).fill(0).map((_, index) => (
@@ -126,17 +138,33 @@ export default function MenuPage() {
                                 <MenuCard
                                     key={menu.id}
                                     menu={menu}
-                                    onSelectFood={selectFood}
+                                    onSelectFood={() => selectFood(menu.id)}
                                 />
                             ))
                         )}
                     </div>
                 </div>
 
-                {/* TODO: make this pane animated, moving from right side off-screen into the viewport, while resizing the menu grid component to fit */}
-                {/* Food description pane */}
-                <FoodDescription food={food} />
-            </div >
+                {/* Food description modal/overlay */}
+                {showDescription && selectedFood.id !== 0 && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+                        <div className="bg-white rounded-lg shadow-xl w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-auto relative animate-fadeIn">
+                            {/* Close button */}
+                            <button 
+                                onClick={closeDescription} 
+                                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 z-10"
+                                aria-label="Close"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            
+                            <FoodDescription food={selectedFood} />
+                        </div>
+                    </div>
+                )}
+            </div>
         </>
     );
 }

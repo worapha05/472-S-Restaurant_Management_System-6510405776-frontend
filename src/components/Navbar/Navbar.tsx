@@ -47,7 +47,6 @@ const Navbar = () => {
     const staffNavItems: NavItemProps[] = [
         { href: '/orders', label: 'จัดการออเดอร์' },
         { href: '/reservations', label: 'จัดการการจอง' },
-        { href: '/foods', label: 'จัดการเมนูอาหาร' },
         { href: '/stock', label: 'สต็อก' },
         { href: '/inventory-logs', label: 'ประวัติเข้า-ออกสต๊อก' },
     ];
@@ -56,7 +55,6 @@ const Navbar = () => {
         { href: '/dashboard', label: 'แดชบอร์ด' },
         { href: '/orders', label: 'ออเดอร์' },
         { href: '/reservations', label: 'การจอง' },
-        { href: '/menu', label: 'จัดการเมนู' },
         { href: '/foods', label: 'จัดการเมนูอาหาร' },
         { href: '/stock', label: 'สต็อก' },
         { href: '/inventory-logs', label: 'ประวัติเข้า-ออกสต๊อก' },

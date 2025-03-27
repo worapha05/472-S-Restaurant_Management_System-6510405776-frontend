@@ -19,9 +19,11 @@ interface CartList {
 
 const MenuCard = ({ menu, onSelectFood }: { menu: Menu, onSelectFood: (food: Menu) => void }) => {
 
-    const addToCart = () => {
+    const addToCart = (e: React.MouseEvent) => {
+        // Prevent default form submission
+        e.preventDefault();
+        
         // Add the item to the cart
-
         const cart = JSON.parse(localStorage.getItem("cart") || "[]") as CartList[];
 
         const existingItemIndex = cart.findIndex((item) => item.food.id === menu.id);
@@ -65,6 +67,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Menu, onSelectFood: (food: Men
                 <button
                     className="mt-4 text-sm text-gray-800 hover:text-gray-600 flex items-center"
                     onClick={() => onSelectFood(menu)}
+                    type="button"
                 >
                     SEE MORE DETAILS
                     <svg
@@ -85,12 +88,13 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Menu, onSelectFood: (food: Men
                 {/* add to cart button on the right, price on the left*/}
                 <div className="flex items-center justify-between mt-4">
                     <span className="text-lg font-semibold">฿ {menu.price}</span>
-                    <form>
-                        <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-                            onClick={addToCart}>
-                            ADD TO CART
-                        </button>
-                    </form>
+                    <button 
+                        className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+                        onClick={addToCart}
+                        type="button"
+                    >
+                        ADD TO CART
+                    </button>
                 </div>
             </div>
         </div>
