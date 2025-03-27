@@ -47,6 +47,7 @@ const Navbar = () => {
     const staffNavItems: NavItemProps[] = [
         { href: '/orders', label: 'จัดการออเดอร์' },
         { href: '/reservations', label: 'จัดการการจอง' },
+        { href: '/foods', label: 'จัดการเมนูอาหาร' },
         { href: '/stock', label: 'สต็อก' },
         { href: '/inventory-logs', label: 'ประวัติเข้า-ออกสต๊อก' },
     ];
@@ -216,6 +217,13 @@ const Navbar = () => {
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
                                             จัดการการจอง
+                                        </Link>
+                                        <Link 
+                                            href="/foods" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            จัดการเมนูอาหาร
                                         </Link>
                                         <Link 
                                             href="/stock" 
