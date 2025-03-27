@@ -7,8 +7,8 @@ interface Food {
   id: number;
   name: string;
   price: number;
-  status: "available" | "unavailable";
-  category: "main course" | "dessert" | "beverage";
+  status: "AVAILABLE" | "NAVAILABLE";
+  category: "MAIN COURSE"| "DESSERT"| "BEVERAGE";
   description: string;
   image_url: string;
 }
@@ -21,8 +21,8 @@ export default function FoodsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // จำนวนรายการต่อหน้า
 
-  const categories = ["ประเภทอาหารทั้งหมด", "main course", "dessert", "beverage"];
-  const statuses = ["สถานะทั้งหมด", "available", "unavailable"];
+  const categories = ["ประเภทอาหารทั้งหมด", "MAIN COURSE", "DESSERT", "BEVERAGE"];
+  const statuses = ["สถานะทั้งหมด", "AVAILABLE" , "NAVAILABLE"];
 
   useEffect(() => {
     async function fetchData() {
@@ -136,7 +136,7 @@ export default function FoodsPage() {
                 <div className="flex mb-4">
                   <span
                     className={`text-sm px-2 py-1 rounded ${
-                      item.status === "available"
+                      item.status === "AVAILABLE"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
                     }`}

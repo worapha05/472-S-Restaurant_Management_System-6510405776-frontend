@@ -72,9 +72,10 @@ export default function CreateFoodPage() {
       valid = false;
     }
 
-    // Validate price
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      newErrors.price = "ราคาต้องมากกว่า 0";
+    // Validate price (ensure it's an integer and greater than 0)
+    const price = parseFloat(formData.price);
+    if (!formData.price || price <= 0 || price !== Math.floor(price)) {
+      newErrors.price = "ราคาต้องมากกว่า 0 และเป็นจำนวนเต็ม";
       valid = false;
     }
 
@@ -160,7 +161,6 @@ export default function CreateFoodPage() {
       setMessage("❌ เกิดข้อผิดพลาด");
     } finally {
       setLoading(false);
-      
     }
   };
 
@@ -209,6 +209,7 @@ export default function CreateFoodPage() {
             name="price"
             value={formData.price}
             onChange={handleChange}
+            step="1"  // Ensure no decimal values
             className="w-full p-2 border rounded" 
           />
           {errors.price && <p className="text-red-500">{errors.price}</p>}
@@ -223,8 +224,8 @@ export default function CreateFoodPage() {
             className="w-full p-2 border rounded"
           >
             <option value="">-- เลือกสถานะ --</option>
-            <option value="available">Available</option>
-            <option value="unavailable">Unavailable</option>
+            <option value="AVAILABLE">AVAILABLE</option>
+            <option value="UNAVAILABLE">UNAVAILABLE</option>
           </select>
           {errors.status && <p className="text-red-500">{errors.status}</p>}
         </div>
@@ -238,9 +239,9 @@ export default function CreateFoodPage() {
             className="w-full p-2 border rounded"
           >
             <option value="">-- เลือกหมวดหมู่ --</option>
-            <option value="main course">Main Course</option>
-            <option value="dessert">Dessert</option>
-            <option value="beverage">Beverage</option>
+            <option value="MAIN COURSE">MAIN COURSE</option>
+            <option value="DESSERT">DESSERT</option>
+            <option value="BEVERAGE">BEVERAGE</option>
           </select>
           {errors.category && <p className="text-red-500">{errors.category}</p>}
         </div>
