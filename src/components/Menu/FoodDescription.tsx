@@ -1,17 +1,6 @@
 'use client';
 
 import { useState } from "react";
-
-interface Food {
-    id: number;
-    name: string;
-    price: number;
-    status: "AVAILABLE" | "UNAVAILABLE";
-    category: 'APPETIZER' | 'ENTREE' | 'MAIN COURSE' | 'DESSERT' | 'DRINK';
-    description: string;
-    image_url: string;
-}
-
 interface CartList {
     food: Food;
     description: string;

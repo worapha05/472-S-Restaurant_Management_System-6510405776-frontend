@@ -27,11 +27,8 @@ export default function ShowTimeSlots() {
 
     async function getData() {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables`, {
-                headers: {
-                  'Authorization': `Bearer ${session?.user?.accessToken}`,
-                }
-              });
+            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables`);
+            
             if (!res.ok) {
                 throw new Error('Failed to fetch data');
             }
@@ -236,7 +233,7 @@ export default function ShowTimeSlots() {
     };
 
     return (
-        <div className="min-h-screen bg-searchBox py-12 px-4 sm:px-6">
+        <div className="min-h-screen py-12 px-4 sm:px-6">
             {/* Success Modal */}
             {reservationSuccess && (
                 <div className="fixed inset-0 bg-primary bg-opacity-50 z-50 flex items-center justify-center">

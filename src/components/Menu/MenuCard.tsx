@@ -1,23 +1,13 @@
 // src/components/MenuCard/MenuCard.tsx
 'use client';
 
-interface Menu {
-    id: number;
-    name: string;
-    price: number;  // Price as a number
-    status: "AVAILABLE" | "UNAVAILABLE";  // Assuming status can only be these two
-    category: 'APPETIZER' | 'ENTREE' | 'MAIN COURSE' | 'DESSERT' | 'DRINK';
-    description: string;
-    image_url: string;
-}
-
 interface CartList {
-    food: Menu;
+    food: Food;
     description: string;
     quantity: number;
 }
 
-const MenuCard = ({ menu, onSelectFood }: { menu: Menu, onSelectFood: (food: Menu) => void }) => {
+const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: (food: Food) => void }) => {
 
     const addToCart = (e: React.MouseEvent) => {
         // Prevent default form submission
