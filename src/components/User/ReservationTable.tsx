@@ -291,7 +291,7 @@ export default function ReservationList({ userId }: ReservationListProps) {
                     วันที่สร้าง
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
-                    จำนวนคน
+                    เลขโต๊ะ
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-secondText tracking-wider">
                     สถานะ

@@ -3,28 +3,57 @@
 import Loading from "@/components/Loading";
 import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSX } from "react";
 
-const paymentMethods = [
+// Type definitions
+interface PaymentMethod {
+    id: number;
+    name: string;
+    value: string;
+}
+
+interface OrderType {
+    id: number;
+    name: string;
+    value: 'DELIVERY' | 'PICKUP' | 'DINE_IN';
+}
+
+interface Table {
+    id: number;
+    number: string;
+    capacity: number;
+    status: string;
+}
+
+const paymentMethods: PaymentMethod[] = [
     { id: 1, name: "เงินสด", value: "CASH" },
     // { id: 2, name: "QR Code", value: "QRCODE" },
 ];
 
-const orderTypes = [
+// Modified order types based on user role
+const userOrderTypes: OrderType[] = [
     { id: 1, name: "จัดส่ง", value: "DELIVERY" },
     { id: 2, name: "รับที่ร้าน", value: "PICKUP" },
 ];
 
-export default function CheckoutPage() {
+const staffOrderTypes: OrderType[] = [
+    { id: 3, name: "กินที่ร้าน", value: "DINE_IN" }
+];
+
+export default function CheckoutPage(): JSX.Element {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [address, setAddress] = useState("");
-    const [selectedMethod, setSelectedMethod] = useState(paymentMethods[0]);
-    const [selectedOrderType, setSelectedOrderType] = useState(orderTypes[0]);
-    const [useMockAddress, setUseMockAddress] = useState(false);
-    const [error, setError] = useState("");
-    const [mockAddress, setMockAddress] = useState("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [address, setAddress] = useState<string>("");
+    const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(paymentMethods[0]);
+    const [selectedOrderType, setSelectedOrderType] = useState<OrderType | null>(null);
+    const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
+    const [useMockAddress, setUseMockAddress] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
+    const [mockAddress, setMockAddress] = useState<string>("");
+    const [tables, setTables] = useState<Table[]>([]);
+    const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+    const [isStaff, setIsStaff] = useState<boolean>(false);
 
     // Check for session and redirect if not authenticated
     useEffect(() => {
@@ -33,14 +62,60 @@ export default function CheckoutPage() {
         }
     }, [status, router]);
 
-    // Set mockAddress when session is loaded
+    // Set user role, order types, and default selection when session is loaded
     useEffect(() => {
-        if (session && session.user && session.user.address) {
-            setMockAddress(session.user.address);
+        if (session && session.user) {
+            // Check if user is staff
+            const userIsStaff = session.user.role === 'STAFF' || session.user.role === 'ADMIN';
+            setIsStaff(userIsStaff);
+            
+            // Set available order types based on role
+            const availableOrderTypes = userIsStaff ? staffOrderTypes : userOrderTypes;
+            setOrderTypes(availableOrderTypes);
+            
+            // Set default selected order type
+            setSelectedOrderType(availableOrderTypes[0]);
+            
+            // Set mock address for regular users
+            if (!userIsStaff && session.user.address) {
+                setMockAddress(session.user.address);
+            }
+            
+            // Fetch tables for staff users
+            if (userIsStaff) {
+                fetchTables();
+            }
         }
     }, [session]);
 
-    const handleMockAddressToggle = () => {
+    // Fetch available tables
+    const fetchTables = async (): Promise<void> => {
+        try {
+            setIsLoading(true);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables`, {
+                headers: {
+                    'Authorization': `Bearer ${session?.user?.accessToken}`,
+                }
+            });
+            if (!res.ok) {
+                throw new Error("Failed to fetch tables");
+            }
+            const data = await res.json();
+            // Filter only available tables
+            const availableTables = data.data.filter((table: Table) => table.status === 'AVAILABLE');
+            setTables(availableTables);
+            if (availableTables.length > 0) {
+                setSelectedTable(availableTables[0]);
+            }
+        } catch (error) {
+            console.error("Error fetching tables:", error);
+            setError("ไม่สามารถดึงข้อมูลโต๊ะได้");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleMockAddressToggle = (): void => {
         const newUseMockAddress = !useMockAddress;
         setUseMockAddress(newUseMockAddress);
         
@@ -52,7 +127,7 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleOrderTypeChange = (orderType : any) => {
+    const handleOrderTypeChange = (orderType: OrderType): void => {
         setSelectedOrderType(orderType);
         
         // Clear address if changing to pickup
@@ -62,10 +137,19 @@ export default function CheckoutPage() {
         }
     };
 
-    const handleCreateOrder = async () => {
-        // Validate address for delivery orders
-        if (selectedOrderType.value === "DELIVERY" && !address) {
+    const handleTableSelection = (table: Table): void => {
+        setSelectedTable(table);
+    };
+
+    const handleCreateOrder = async (): Promise<void> => {
+        // Validate based on order type
+        if (selectedOrderType?.value === "DELIVERY" && !address) {
             setError("กรุณากรอกที่อยู่ก่อนดำเนินการสั่งซื้อ");
+            return;
+        }
+        
+        if (selectedOrderType?.value === "DINE_IN" && !selectedTable) {
+            setError("กรุณาเลือกโต๊ะก่อนดำเนินการสั่งซื้อ");
             return;
         }
         
@@ -83,18 +167,41 @@ export default function CheckoutPage() {
         setIsLoading(true);
         setError("");
 
-        var orderId = 0;
+        let orderId = 0;
 
         try {
             const cartData = localStorage.getItem("cart");
-            const cartItems = cartData ? JSON.parse(cartData) : [];
-            const sumPrice = cartItems.reduce((total: number, item: any) => {
+            const cartItems: CartItem[] = cartData ? JSON.parse(cartData) : [];
+            const sumPrice = cartItems.reduce((total: number, item: CartItem) => {
                 return total + item.food.price * item.quantity;
             }, 0);
-            const user_id = session.user.id;
+
+            let user_id: string | null;
+
+            if (session.user.role === 'STAFF' || session.user.role === 'ADMIN') {
+                user_id = null;
+            } else {
+                user_id = session.user.id;
+            }
             
-            // For pickup orders, set address to null or a placeholder
-            const orderAddress = selectedOrderType.value === "PICKUP" ? null : address;
+            // Set address based on order type
+            let orderAddress: string | null = null;
+            if (selectedOrderType?.value === "DELIVERY") {
+                orderAddress = address;
+            }
+
+            // Set table_id based on order type
+            const tableId = selectedOrderType?.value === "DINE_IN" ? selectedTable?.id : null;
+
+            console.log("req", JSON.stringify({
+                user_id: user_id,
+                table_id: tableId, 
+                address: orderAddress,
+                type: selectedOrderType?.value,
+                payment_method: selectedMethod.value,
+                sum_price: sumPrice,
+            }),);
+            
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/orders`, {
                 method: "POST",
@@ -104,9 +211,9 @@ export default function CheckoutPage() {
                 },
                 body: JSON.stringify({
                     user_id: user_id,
-                    table_id: null, 
+                    table_id: tableId, 
                     address: orderAddress,
-                    type: selectedOrderType.value,
+                    type: selectedOrderType?.value,
                     payment_method: selectedMethod.value,
                     sum_price: sumPrice,
                 }),
@@ -118,8 +225,9 @@ export default function CheckoutPage() {
             const data = await res.json();
             console.log(data.data.id);
             
-            cartItems.forEach((item: any) => {
-                fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/order_lists`, {
+            // Create order list items
+            for (const item of cartItems) {
+                await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/order_lists`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -128,14 +236,60 @@ export default function CheckoutPage() {
                     body: JSON.stringify({
                         order_id: data.data.id,
                         food_id: item.food.id,
-                        description: item.description,
+                        description: item.description || "",
                         price: item.food.price,
                         quantity: item.quantity
                     }),
                 });
-            });
+            }
+
+            // Update table status if DINE_IN
+            if (selectedOrderType?.value === "DINE_IN" && selectedTable) {
+                await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables/${selectedTable.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${session?.user?.accessToken}`,
+                    },
+                    body: JSON.stringify({
+                        status: "OCCUPIED"
+                    }),
+                });
+            }
+
             localStorage.removeItem("cart");
             orderId = data.data.id;
+            
+            if (session.user.role === 'STAFF' || session.user.role === 'ADMIN') {
+                const getFormattedDate = () => {
+                    const now = new Date();
+                    return now.getFullYear() + '-' + 
+                        String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(now.getDate()).padStart(2, '0') + ' ' + 
+                        String(now.getHours()).padStart(2, '0') + ':' + 
+                        String(now.getMinutes()).padStart(2, '0') + ':' + 
+                        String(now.getSeconds()).padStart(2, '0');
+                };
+    
+                const res2 = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.user.accessToken}`,
+                    },
+                    body: JSON.stringify({
+                        status: 'IN_PROGRESS',
+                        accept: getFormattedDate()
+                    }),
+                });
+    
+                if (!res2.ok) {
+                    const errorData = await res2.json().catch(() => null);
+                    console.error('API error response:', errorData);
+                    throw new Error(errorData?.message);
+                }
+            }
+
             alert("Order created successfully!");    
         } catch (error) {
             console.error("Error creating order:", error);
@@ -205,7 +359,7 @@ export default function CheckoutPage() {
                         
                         {/* Conditional content based on order type */}
                         <div className="mt-4">
-                            {selectedOrderType.value === "DELIVERY" && (
+                            {selectedOrderType?.value === "DELIVERY" && (
                                 <div className="flex flex-col gap-4">
                                     <p className="font-bold text-xl">ที่อยู่จัดส่ง</p>
                                     <input
@@ -237,12 +391,47 @@ export default function CheckoutPage() {
                                 </div>
                             )}
                             
-                            {selectedOrderType.value === "PICKUP" && (
+                            {selectedOrderType?.value === "PICKUP" && (
                                 <div className="border px-4 py-6 rounded-xl bg-gray-100">
                                     <p className="font-medium text-lg mb-2">รายละเอียดการรับอาหาร:</p>
                                     <p className="mt-2">- กรุณามารับอาหารที่ร้านภายใน 30 นาทีหลังได้รับการยืนยัน</p>
                                     <p className="mt-1">- แสดงหมายเลขคำสั่งซื้อเพื่อรับอาหาร</p>
                                     <p className="mt-1">- สามารถติดต่อร้านได้ที่เบอร์ 696-969-6969</p>
+                                </div>
+                            )}
+                            
+                            {selectedOrderType?.value === "DINE_IN" && (
+                                <div className="flex flex-col gap-4">
+                                    <p className="font-bold text-xl">เลือกโต๊ะ</p>
+                                    
+                                    {tables.length === 0 ? (
+                                        <div className="border px-4 py-6 rounded-xl bg-gray-100">
+                                            <p className="text-center text-gray-500">ไม่มีโต๊ะว่าง</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-3 gap-4">
+                                            {tables.map((table) => (
+                                                <div 
+                                                    key={table.id}
+                                                    className={`border px-4 py-4 rounded-xl cursor-pointer hover:border-primary transition-all
+                                                    ${selectedTable?.id === table.id ? "bg-gray-200 border-primary" : ""}`}
+                                                    onClick={() => handleTableSelection(table)}
+                                                    role="button"
+                                                    tabIndex={0}
+                                                >
+                                                    <input 
+                                                        type="radio"
+                                                        name="tableSelection"
+                                                        checked={selectedTable?.id === table.id} 
+                                                        readOnly
+                                                        className="mr-2"
+                                                        aria-checked={selectedTable?.id === table.id}
+                                                    />
+                                                    โต๊ะที่ {table.id}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -276,9 +465,16 @@ export default function CheckoutPage() {
                         {error && <p className="text-red-500 text-sm">{error}</p>}
                         <button
                             onClick={handleCreateOrder}
+                            disabled={
+                                (selectedOrderType?.value === "DINE_IN" && tables.length === 0) ||
+                                isLoading
+                            }
                             className={`
                                 flex items-center justify-center p-6 rounded-2xl font-bold transition-all
-                                bg-button text-white hover:bg-hoverButton cursor-pointer
+                                ${(selectedOrderType?.value === "DINE_IN" && tables.length === 0) || isLoading
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-button text-white hover:bg-hoverButton cursor-pointer"
+                                }
                             `}
                         >
                             ดำเนินการต่อ

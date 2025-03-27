@@ -41,7 +41,7 @@ export default function OrderCard({ order }: { order: Order }) {
     const formatOrderType = (type: string) => {
         switch (type) {
             case 'DINE_IN': return 'ทานที่ร้าน';
-            case 'TAKE_AWAY': return 'รับกลับบ้าน';
+            case 'TAKEAWAY': return 'รับกลับบ้าน';
             case 'DELIVERY': return 'จัดส่ง';
             default: return type;
         }
@@ -56,7 +56,7 @@ export default function OrderCard({ order }: { order: Order }) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                 );
-            case 'TAKE_AWAY':
+            case 'TAKEAWAY':
                 return (
                     <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -163,7 +163,7 @@ export default function OrderCard({ order }: { order: Order }) {
                             </div>
 
                             {/* Action buttons */}
-                            <div className="flex space-x-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            {/* <div className="flex space-x-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 <button className="bg-searchBox hover:bg-neutral-300 text-mainText p-2 rounded-lg transition-colors">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -184,7 +184,7 @@ export default function OrderCard({ order }: { order: Order }) {
                                         </button>
                                     </>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
