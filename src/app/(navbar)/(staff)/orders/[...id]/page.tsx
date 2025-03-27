@@ -142,12 +142,9 @@ function OrderDetail({ order, userData }: { order: Order, userData: User | null 
             {displayUser && (
               <div className="col-span-1 md:col-span-3">
                 <h3 className="text-sm font-medium text-neutral-500 mb-1">ข้อมูลลูกค้า</h3>
-                <p>{displayUser.name}</p>
-                <p>TEL. {displayUser.phone_number}</p>
-                {userData?.email && <p>Email: {userData.email}</p>}
-                {userData?.address && order.type !== 'DELIVERY' && (
-                  <p className="whitespace-pre-line">ที่อยู่: {userData.address}</p>
-                )}
+                <p>ชื่อผู้สั่ง: {displayUser.name}</p>
+                <p>เบอร์โทร: {displayUser.phone_number}</p>
+                {userData?.email && <p>อีเมล: {userData.email}</p>}
               </div>
             )}
           </div>

@@ -13,6 +13,22 @@ async function getData(id: string) {
     console.log("Fetched Data:", resJson);
     return resJson.data;
 }
+const formatFoodStatus = (status: string) => {
+    switch (status.toUpperCase()) {
+        case 'AVAILABLE': return 'เปิดขาย';
+        case 'UNAVAILABLE': return 'ไม่เปิดขาย';
+        default: return status;
+    }
+};
+
+const formatFoodCategory = (category: string) => {
+  switch (category.toUpperCase()) {
+      case 'MAIN COURSE': return 'จานหลัก';
+      case 'DESSERT': return 'ของหวาน';
+      case 'BEVERAGE': return 'เครื่องดื่ม';
+      default: return category;
+  }
+};
 
 export default async function FoodPage({ params }: { params: { id: string } }) {
     const food = await getData(params.id);
@@ -59,7 +75,7 @@ export default async function FoodPage({ params }: { params: { id: string } }) {
                     {/* Food Information */}
                     <div className="flex flex-col items-start w-full">
                         <h2 className="text-2xl font-semibold text-gray-800">{food.name}</h2>
-                        <p className="text-lg text-gray-600">{food.category.toUpperCase()}</p>
+                        <p className="text-lg text-gray-600">{formatFoodCategory(food.category)}</p>
 
                         <p className="text-xl font-bold text-primary mt-4">{`฿${Number(food.price)}`}</p>
 
@@ -70,7 +86,7 @@ export default async function FoodPage({ params }: { params: { id: string } }) {
                                 food.status === "AVAILABLE" ? "bg-green-500" : "bg-red-500"
                             }`}
                         >
-                            {food.status}
+                            {formatFoodStatus(food.status)}
                         </p>
                     </div>
                 </div>

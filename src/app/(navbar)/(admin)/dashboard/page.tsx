@@ -158,7 +158,7 @@ export default function FinancialDashboardPage() {
     const translations = {
       'DINE_IN': 'กินที่ร้าน',
       'TAKEAWAY': 'กลับบ้าน', 
-      'DELIVERY': 'Delivery'
+      'DELIVERY': 'จัดส่ง'
     };
     
     return translations[type] || type;

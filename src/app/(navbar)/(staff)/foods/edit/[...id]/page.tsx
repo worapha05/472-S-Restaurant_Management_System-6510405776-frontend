@@ -7,24 +7,14 @@ import StandaloneMinioUploader from "@/components/Upload/Upload";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
-// Define TypeScript interfaces
-interface FoodData {
-    name: string;
-    price: string;
-    status: "available" | "unavailable";
-    category: "main course" | "dessert" | "beverage";
-    description: string;
-    image_url: string;
-}
-
 interface ApiResponse {
     success: boolean;
     data: {
         id: string;
         name: string;
         price: number;
-        status: "available" | "unavailable";
-        category: "main course" | "dessert" | "beverage";
+        status: "AVAILABLE" | "UNAVAILABLE";
+        category: "MAIN COURSE"| "DESSERT"| "BEVERAGE";
         description: string;
         image_url: string;
         created_at: string;
@@ -40,11 +30,11 @@ interface FormErrors {
 }
 
 export default function EditFoodPage() {
-    const [formData, setFormData] = useState<FoodData>({
+    const [formData, setFormData] = useState<Food>({
         name: "",
-        price: "",
-        status: "available",
-        category: "main course",
+        price: 0,
+        status: "AVAILABLE",
+        category: "MAIN COURSE",
         description: "",
         image_url: "",
     });
@@ -87,7 +77,7 @@ export default function EditFoodPage() {
                 const foodData = res.data.data;
                 setFormData({
                     name: foodData.name,
-                    price: foodData.price.toString(),
+                    price: foodData.price,
                     status: foodData.status,
                     category: foodData.category,
                     description: foodData.description || "",
@@ -130,7 +120,7 @@ export default function EditFoodPage() {
             isValid = false;
         }
         
-        if (!formData.price || parseFloat(formData.price) <= 0) {
+        if (!formData.price || formData.price <= 0) {
             newErrors.price = "ราคาต้องมากกว่า 0";
             isValid = false;
         }
@@ -165,7 +155,7 @@ export default function EditFoodPage() {
             
             const dataToSubmit = {
                 ...formData,
-                price: parseFloat(formData.price)
+                price: formData.price
             };
             
             await axios.put(
@@ -292,8 +282,8 @@ export default function EditFoodPage() {
                             onChange={handleChange} 
                             className="w-full p-2 border rounded"
                         >
-                            <option value="available">Available</option>
-                            <option value="unavailable">Unavailable</option>
+                            <option value="AVAILABLE">เปิดขาย</option>
+                            <option value="UNAVAILABLE">ไม่เปิดขาย</option>
                         </select>
                     </div>
 
@@ -305,9 +295,9 @@ export default function EditFoodPage() {
                             onChange={handleChange} 
                             className="w-full p-2 border rounded"
                         >
-                            <option value="main course">Main Course</option>
-                            <option value="dessert">Dessert</option>
-                            <option value="beverage">Beverage</option>
+                            <option value="MAIN COURSE">จานหลัก</option>
+                            <option value="DESSERT">ของหวาน</option>
+                            <option value="BEVERAGE">เครื่องดื่ม</option>
                         </select>
                     </div>
 

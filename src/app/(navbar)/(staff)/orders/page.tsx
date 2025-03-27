@@ -239,7 +239,7 @@ export default function OrdersPage() {
                 )}
                 
                 {/* Orders Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                     <SummaryCard 
                         title="คำสั่งซื้อทั้งหมด"
                         count={orders.length}
@@ -261,6 +261,17 @@ export default function OrdersPage() {
                         }
                         bgColor="bg-orange-100"
                         iconColor="text-orange-700"
+                    />
+                    <SummaryCard 
+                        title="กำลังดำเนินการ"
+                        count={orders.filter(order => order.status === 'IN_PROGRESS').length}
+                        icon={
+                            <svg className="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                            </svg>
+                        }
+                        bgColor="bg-inputFieldFocus"
+                        iconColor="text-white"
                     />
                     <SummaryCard 
                         title="เสร็จสิ้น"

@@ -224,8 +224,8 @@ export default function CreateFoodPage() {
             className="w-full p-2 border rounded"
           >
             <option value="">-- เลือกสถานะ --</option>
-            <option value="AVAILABLE">AVAILABLE</option>
-            <option value="UNAVAILABLE">UNAVAILABLE</option>
+            <option value="AVAILABLE">เปิดขาย</option>
+            <option value="UNAVAILABLE">ไม่เปิดขาย</option>
           </select>
           {errors.status && <p className="text-red-500">{errors.status}</p>}
         </div>
@@ -239,9 +239,9 @@ export default function CreateFoodPage() {
             className="w-full p-2 border rounded"
           >
             <option value="">-- เลือกหมวดหมู่ --</option>
-            <option value="MAIN COURSE">MAIN COURSE</option>
-            <option value="DESSERT">DESSERT</option>
-            <option value="BEVERAGE">BEVERAGE</option>
+            <option value="MAIN COURSE">จานหลัก</option>
+            <option value="DESSERT">ของหวาน</option>
+            <option value="BEVERAGE">เครื่องดื่ม</option>
           </select>
           {errors.category && <p className="text-red-500">{errors.category}</p>}
         </div>

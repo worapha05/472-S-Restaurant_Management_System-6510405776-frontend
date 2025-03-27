@@ -3,16 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-interface Food {
-  id: number;
-  name: string;
-  price: number;
-  status: "AVAILABLE" | "NAVAILABLE";
-  category: "MAIN COURSE"| "DESSERT"| "BEVERAGE";
-  description: string;
-  image_url: string;
-}
-
 export default function FoodsPage() {
   const [foodItems, setFoodItems] = useState<Food[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +12,7 @@ export default function FoodsPage() {
   const itemsPerPage = 12; // จำนวนรายการต่อหน้า
 
   const categories = ["ประเภทอาหารทั้งหมด", "MAIN COURSE", "DESSERT", "BEVERAGE"];
-  const statuses = ["สถานะทั้งหมด", "AVAILABLE" , "NAVAILABLE"];
+  const statuses = ["สถานะทั้งหมด", "AVAILABLE" , "UNAVAILABLE"];
 
   const formatFoodStatus = (status: string) => {
       switch (status.toUpperCase()) {
@@ -39,7 +29,7 @@ export default function FoodsPage() {
         case 'BEVERAGE': return 'เครื่องดื่ม';
         default: return category;
     }
-};
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -148,7 +138,7 @@ export default function FoodsPage() {
                 <h2 className="text-xl font-semibold mb-2">{item.name}</h2>
 
                 <div className="flex gap-4 mb-2">
-                  <span className="text-sm text-gray-500">ประเภทอาหาร: {item.category}</span>
+                  <span className="text-sm text-gray-500">ประเภทอาหาร: {formatFoodCategory(item.category)}</span>
                 </div>
                 <div className="flex mb-4">
                   <span

@@ -1,9 +1,9 @@
 interface Food {
-    id: number;
+    id?: number;
     name: string;
     price: number;
     status: "AVAILABLE" | "UNAVAILABLE";
-    category: 'APPETIZER' | 'ENTREE' | 'MAIN COURSE' | 'DESSERT' | 'DRINK';
+    category: "MAIN COURSE"| "DESSERT"| "BEVERAGE";
     description: string;
     image_url: string;
 }

@@ -15,7 +15,7 @@ interface PaymentMethod {
 interface OrderType {
     id: number;
     name: string;
-    value: 'DELIVERY' | 'PICKUP' | 'DINE_IN';
+    value: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN';
 }
 
 const paymentMethods: PaymentMethod[] = [
@@ -26,7 +26,7 @@ const paymentMethods: PaymentMethod[] = [
 // Modified order types based on user role
 const userOrderTypes: OrderType[] = [
     { id: 1, name: "จัดส่ง", value: "DELIVERY" },
-    { id: 2, name: "รับที่ร้าน", value: "PICKUP" },
+    { id: 2, name: "รับที่ร้าน", value: "TAKEAWAY" },
 ];
 
 const staffOrderTypes: OrderType[] = [
@@ -269,10 +269,10 @@ export default function CheckoutPage(): JSX.Element {
                 }
             }
 
-            alert("Order created successfully!");    
+            alert("ทำการสร้างคำสั่งซื้อสําเร็จ");    
         } catch (error) {
             console.error("Error creating order:", error);
-            alert("Failed to create order. Please try again.");
+            alert("ทำการสร้างคำสั่งซื้อไม่สําเร็จ กรุณาลองใหม่อีกครั้ง");
         } finally {
             setIsLoading(false);
             redirect(`/orders/${orderId}`);
