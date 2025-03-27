@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 3000
 
 # Make sure Next.js binds to all interfaces
-CMD ["yarn", "dev,]
+CMD ["yarn", "dev"]

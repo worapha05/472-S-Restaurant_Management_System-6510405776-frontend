@@ -32,6 +32,25 @@ function formatPaymentMethod(method: string) {
   }
 }
 
+const formatOrderType = (type: string) => {
+  switch (type) {
+      case 'DINE_IN': return 'ทานที่ร้าน';
+      case 'TAKEAWAY': return 'รับกลับบ้าน';
+      case 'DELIVERY': return 'จัดส่ง';
+      default: return type;
+  }
+};
+
+const formatOrderStatus = (status: string) => {
+  switch (status) {
+      case 'PENDING': return 'รอดำเนินการ';
+      case 'IN_PROGRESS': return 'กำลังดำเนินการ';
+      case 'COMPLETED': return 'เสร็จสิ้น';
+      case 'CANCELLED': return 'ยกเลิก';
+      default: return status;
+  }
+};
+
 // Get status color class
 function getStatusColor(status: string): string {
   switch (status.toUpperCase()) {
@@ -92,7 +111,7 @@ function OrderDetail({ order, userData }: { order: Order, userData: User | null 
               </p>
             </div>
             <div className={`px-4 py-1.5 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-              {order.status}
+              {formatOrderStatus(order.status)}
             </div>
           </div>
 
@@ -100,7 +119,7 @@ function OrderDetail({ order, userData }: { order: Order, userData: User | null 
 
             <div>
               <h3 className="text-sm font-medium text-neutral-500 mb-1">ประเภท</h3>
-              <p className="font-medium">{order.type}</p>
+              <p className="font-medium">{formatOrderType(order.type)}</p>
             </div>
 
             <div>

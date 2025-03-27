@@ -30,6 +30,17 @@ function getStatusDescription(status: string): string {
         default: return 'เกิดข้อผิดพลาด';
     }
 }
+
+const formatOrderStatus = (status: string) => {
+    switch (status) {
+        case 'PENDING': return 'รอดำเนินการ';
+        case 'IN_PROGRESS': return 'กำลังดำเนินการ';
+        case 'ACCEPTED': return 'ตอบรับคำสั่งซื้อ';
+        case 'COMPLETED': return 'เสร็จสิ้น';
+        case 'CANCELLED': return 'ยกเลิก';
+        default: return status;
+    }
+  };
 // Format date for display
 function formatDate(dateString: string) {
     let date: Date;
@@ -70,7 +81,7 @@ function Status({ status, date }: { status: string, date: string }) {
                 <div className="flex justify-between">
                     <div className="flex flex-col gap-2">
                         <span className={`px-2 py-0.5 rounded-full text-xs max-w-fit ${getStatusColor(status)}`}>
-                            {status}
+                            {formatOrderStatus(status)}
                         </span>
                         <p className="text-sm text-neutral-500">
                             {getStatusDescription(status)}

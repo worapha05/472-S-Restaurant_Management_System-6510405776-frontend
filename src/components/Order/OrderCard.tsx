@@ -47,6 +47,16 @@ export default function OrderCard({ order }: { order: Order }) {
         }
     };
 
+    const formatOrderStatus = (status: string) => {
+        switch (status) {
+            case 'PENDING': return 'รอดำเนินการ';
+            case 'IN_PROGRESS': return 'กำลังดำเนินการ';
+            case 'COMPLETED': return 'เสร็จสิ้น';
+            case 'CANCELLED': return 'ยกเลิก';
+            default: return status;
+        }
+    };
+
     // Get order type icon
     const getOrderTypeIcon = (type: string) => {
         switch (type) {
@@ -86,7 +96,7 @@ export default function OrderCard({ order }: { order: Order }) {
                     <div className="flex items-center">
                         <div className="font-mono text-sm text-secondary mr-3">#{order.id}</div>
                         <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                            {order.status}
+                            {formatOrderStatus(order.status)}
                         </div>
                     </div>
                     <div className="flex items-center text-sm text-secondary">
