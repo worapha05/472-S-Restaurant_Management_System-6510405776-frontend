@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, JSX } from 'react';
 import AutoDismissAlert from '@/components/Notification/Notification';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -174,7 +174,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${session.user.accessToken}`
+          'Authorization': `Bearer ${session?.user.accessToken}`
         }
       });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');

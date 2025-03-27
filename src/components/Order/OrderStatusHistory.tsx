@@ -13,7 +13,7 @@ interface OrderProps {
 function getStatusColor(status: string): string {
     switch (status.toUpperCase()) {
         case 'PENDING': return 'bg-orange-100 text-orange-700';
-        case 'IN_PROGRESS': return 'bg-orange-100 text-orange-700';
+        case 'IN_PROGRESS': return 'bg-inputFieldFocus text-white';
         case 'COMPLETED': return 'bg-green-100 text-green-700';
         case 'CANCELLED': return 'bg-red-100 text-red-700';
         default: return 'bg-gray-100 text-gray-700';

@@ -28,7 +28,7 @@ export default function OrderList({ userId }: OrderListProps) {
     { value: 'all', label: 'ทั้งหมด' },
     { value: 'completed', label: 'เสร็จสิ้น' },
     { value: 'delivered', label: 'จัดส่งแล้ว' },
-    { value: 'processing', label: 'กำลังดำเนินการ' },
+    { value: 'in_progress', label: 'กำลังดำเนินการ' },
     { value: 'pending', label: 'รอดำเนินการ' },
     { value: 'cancelled', label: 'ยกเลิก' }
   ];
@@ -62,7 +62,7 @@ export default function OrderList({ userId }: OrderListProps) {
     switch (type?.toUpperCase()) {
       case 'DELIVERY':
         return 'จัดส่ง';
-      case 'PICKUP':
+      case 'TAKEAWAY':
         return 'รับที่ร้าน';
       case 'DINE_IN':
         return 'ทานที่ร้าน';
@@ -83,7 +83,7 @@ export default function OrderList({ userId }: OrderListProps) {
             {getOrderTypeText(type)}
           </span>
         );
-      case 'PICKUP':
+      case 'TAKEAWAY':
         return (
           <span className="flex items-center text-green-600">
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -181,7 +181,8 @@ export default function OrderList({ userId }: OrderListProps) {
       case 'completed':
       case 'delivered':
         return 'bg-acceptGreen text-background';
-      case 'processing':
+      case 'in_progress':
+        return 'bg-inputFieldFocus text-white';
       case 'pending':
         return 'bg-searchBox text-primary';
       case 'cancelled':
@@ -195,7 +196,7 @@ export default function OrderList({ userId }: OrderListProps) {
     switch (status.toLowerCase()) {
       case 'completed': return 'เสร็จสิ้น';
       case 'delivered': return 'จัดส่งแล้ว';
-      case 'processing': return 'กำลังดำเนินการ';
+      case 'in_progress': return 'กำลังดำเนินการ';
       case 'pending': return 'รอดำเนินการ';
       case 'cancelled': return 'ยกเลิก';
       default: return status;

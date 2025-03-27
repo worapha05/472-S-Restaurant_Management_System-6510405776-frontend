@@ -7,7 +7,7 @@ export default function OrderCard({ order }: { order: Order }) {
     const getStatusColor = (status: string): string => {
         switch (status.toUpperCase()) {
             case 'PENDING': return 'bg-orange-100 text-orange-700';
-            case 'IN_PROGRESS': return 'bg-inputFieldFocus bg-opacity-10 text-inputFieldFocus';
+            case 'IN_PROGRESS': return 'bg-inputFieldFocus text-white';
             case 'COMPLETED': return 'bg-acceptGreen bg-opacity-10 text-acceptGreen';
             case 'CANCELLED': return 'bg-cancelRed bg-opacity-10 text-cancelRed';
             default: return 'bg-secondary bg-opacity-10 text-secondary';

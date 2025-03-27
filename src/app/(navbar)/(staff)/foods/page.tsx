@@ -24,6 +24,23 @@ export default function FoodsPage() {
   const categories = ["ประเภทอาหารทั้งหมด", "main course", "dessert", "beverage"];
   const statuses = ["สถานะทั้งหมด", "available", "unavailable"];
 
+  const formatFoodStatus = (status: string) => {
+      switch (status.toUpperCase()) {
+          case 'AVAILABLE': return 'เปิดขาย';
+          case 'UNAVAILABLE': return 'ไม่เปิดขาย';
+          default: return status;
+      }
+  };
+
+  const formatFoodCategory = (category: string) => {
+    switch (category.toUpperCase()) {
+        case 'MAIN COURSE': return 'จานหลัก';
+        case 'DESSERT': return 'ของหวาน';
+        case 'BEVERAGE': return 'เครื่องดื่ม';
+        default: return category;
+    }
+};
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -98,7 +115,7 @@ export default function FoodsPage() {
         >
           {categories.map((category) => (
             <option key={category} value={category}>
-              {category.replace("_", " ")}
+              {formatFoodCategory(category)}
             </option>
           ))}
         </select>
@@ -109,7 +126,7 @@ export default function FoodsPage() {
         >
           {statuses.map((status) => (
             <option key={status} value={status}>
-              {status.replace("_", " ")}
+              {formatFoodStatus(status)}
             </option>
           ))}
         </select>
@@ -141,7 +158,7 @@ export default function FoodsPage() {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {item.status}
+                    {formatFoodStatus(item.status.toUpperCase())}
                   </span>
                 </div>
 
