@@ -2,6 +2,8 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import AutoDismissAlert from '@/components/Notification/Notification';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface StockItem {
   id: number;
@@ -52,6 +54,9 @@ const reverseTranslateCategory = (thaiCategory: string): string => {
 const categories: string[] = ['เนื้อสัตว์', 'ผัก', 'ผลไม้', 'ไข่ & นม', 'ธัญพืช & แป้ง', 'เครื่องปรุง', 'น้ำมัน & ไขมัน', 'อื่น ๆ'];
 
 export default function Inventory() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
   const [StockItems, setStockItems] = useState<StockItem[]>([]);
   const [newStockItem, setNewStockItem] = useState<NewStockItem>({
     name: '',
@@ -73,6 +78,17 @@ export default function Inventory() {
   const [formErrors, setFormErrors] = useState<any>({});
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+    if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
+      router.push('/');
+    }
+  }, [session, status, router]);
+
+  useEffect(() => {
     if (isOpenNotification) {
       const timer = setTimeout(() => {
         setIsOpenNotification(false);
@@ -84,7 +100,13 @@ export default function Inventory() {
   const fetchStockItems = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockItems`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockItems`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
+        }
+      });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
       const data = await response.json();
 
@@ -103,18 +125,20 @@ export default function Inventory() {
   };
 
   useEffect(() => {
-    fetchStockItems();
-    setTypeNotification('success');
-    setMessageNotification('ดึงข้อมูลวัตถุดิบสำเร็จแล้ว');
-    setIsOpenNotification(true);
-  }, []);
+    if (session && session.user && session.user.accessToken) {
+      fetchStockItems();
+      setTypeNotification('success');
+      setMessageNotification('ดึงข้อมูลวัตถุดิบสำเร็จแล้ว');
+      setIsOpenNotification(true);
+    }
+  }, [session, status]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewStockItem({
       ...newStockItem,
-      [name]: name === 'current_stock' 
-        ? (parseFloat(value) || 0) 
+      [name]: name === 'current_stock'
+        ? (parseFloat(value) || 0)
         : value
     });
     if (formErrors[name]) {
@@ -144,6 +168,7 @@ export default function Inventory() {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
         },
         body: JSON.stringify(newStockItem),
       });
@@ -191,36 +216,6 @@ export default function Inventory() {
     );
   };
 
-  const deleteStockItem = async (id: number) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockItems/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        setTypeNotification('error');
-        setMessageNotification('ลบวัตถุดิบนี้ไม่ได้เนื่องจากยังคงมีจำนวนคงเหลืออยู่ในคลังวัตถุดิบ');
-        setIsOpenNotification(true);
-      } else {
-        setTypeNotification('success');
-        setMessageNotification('ลบวัตถุดิบนี้สำเร็จ');
-        setIsOpenNotification(true);
-      }
-
-      await fetchStockItems();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const saveEdit = async (id: number) => {
     try {
       setIsLoading(true);
@@ -232,6 +227,7 @@ export default function Inventory() {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
         },
         body: JSON.stringify(updatedData),
       });
@@ -303,7 +299,7 @@ export default function Inventory() {
   const filteredStockItems = Array.isArray(StockItems) ? StockItems
     .filter(item => {
       const nameMatch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const categoryMatch = filterCategory === '' || 
+      const categoryMatch = filterCategory === '' ||
         item.category.replace('&amp;', '&') === filterCategory.replace('&amp;', '&');
       return nameMatch && categoryMatch;
     })
@@ -439,7 +435,7 @@ export default function Inventory() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold mb-8">ระบบจัดการวัตถุดิบคงเหลือ</h1>
+        <h1 className="text-3xl font-bold mb-8">ระบบจัดการวัตถุดิบ</h1>
 
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-semibold mb-4">เพิ่มวัตถุดิบใหม่</h2>
@@ -650,12 +646,6 @@ export default function Inventory() {
                                 className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md transition duration-200"
                               >
                                 แก้ไข
-                              </button>
-                              <button
-                                onClick={() => deleteStockItem(StockItem.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md transition duration-200"
-                              >
-                                ลบ
                               </button>
                             </>
                           )}

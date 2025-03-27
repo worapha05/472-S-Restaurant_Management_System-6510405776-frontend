@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import AutoDismissAlert from '@/components/Notification/Notification';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface StockItem {
   id: number;
@@ -67,6 +70,9 @@ const reverseTranslateCategory = (thaiCategory: string): string => {
 };
 
 const InventoryOverview: React.FC = (): JSX.Element => {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [stockEntrys, setStockEntrys] = useState<StockEntry[]>([]);
   const [inventoryLogs, setInventoryLogs] = useState<InventoryLog[]>([]);
@@ -100,10 +106,27 @@ const InventoryOverview: React.FC = (): JSX.Element => {
   const [ingredientOptions, setIngredientOptions] = useState<{ value: string; label: string }[]>([]);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    // Check if user is authenticated
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+    if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
+      router.push('/');
+    }
+  }, [session, status, router]);
+
   const fetchStockItems = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockItems`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockItems`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
+        }
+      });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
       const data = await response.json();
       setStockItems(Array.isArray(data) ? data : data.data || []);
@@ -118,7 +141,13 @@ const InventoryOverview: React.FC = (): JSX.Element => {
   const fetchStockEntries = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockEntries`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/stockEntries`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
+        }
+      });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
       const data = await response.json();
       if (data.data) {
@@ -139,7 +168,13 @@ const InventoryOverview: React.FC = (): JSX.Element => {
   const fetchInventoryLogs = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/inventoryLogs`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/inventoryLogs`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${session.user.accessToken}`
+        }
+      });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
       const data = await response.json();
       if (data.data) {
@@ -168,13 +203,15 @@ const InventoryOverview: React.FC = (): JSX.Element => {
   }, [stockItems]);
 
   useEffect(() => {
-    fetchStockItems();
-    fetchStockEntries();
-    fetchInventoryLogs();
-    setTypeNotification('success');
-    setMessageNotification('ข้อมูลถูกดึงขึ้นมาเรียบร้อย สามารถดำเนินการขั้นตอนต่อไปได้');
-    setIsOpenNotification(true);
-  }, []);
+    if (session && session.user && session.user.accessToken) {
+      fetchStockItems();
+      fetchStockEntries();
+      fetchInventoryLogs();
+      setTypeNotification('success');
+      setMessageNotification('ข้อมูลถูกดึงขึ้นมาเรียบร้อย สามารถดำเนินการขั้นตอนต่อไปได้เลย');
+      setIsOpenNotification(true);
+    }
+  }, [session, status]);
 
   useEffect(() => {
     let result = Array.isArray(stockItems) ? [...stockItems] : [];
@@ -208,7 +245,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
     if (movementFilter.ingredientId) {
       const selectedItem = stockItems.find(item => item.id === Number(movementFilter.ingredientId));
       if (selectedItem) {
-        result = result.filter(item => 
+        result = result.filter(item =>
           item.stock_item_name === selectedItem.name
         );
       }
@@ -232,7 +269,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
       });
     }
     if (movementFilter.inventoryLogId) {
-      result = result.filter(item => 
+      result = result.filter(item =>
         item.inventory_log_id.toString().includes(movementFilter.inventoryLogId)
       );
     }
@@ -337,6 +374,15 @@ const InventoryOverview: React.FC = (): JSX.Element => {
     };
   }, [searchTimeout]);
 
+  useEffect(() => {
+    if (isOpenNotification) {
+      const timer = setTimeout(() => {
+        setIsOpenNotification(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpenNotification]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {isOpenNotification && (
@@ -347,7 +393,19 @@ const InventoryOverview: React.FC = (): JSX.Element => {
         />
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">ระบบจัดการวัตถุดิบ</h1>
+        <div className='flex justify-between p-2 my-2'>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">ระบบจัดการวัตถุดิบ</h1>
+
+          <Link
+            href="/create-inventory-logs"
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded-lg transition-colors duration-300 ease-in-out shadow-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            <span className="text-base font-semibold">เพิ่มประวัติการนำเข้า/ออกของวัตถุดิบ</span>
+          </Link>
+        </div>
 
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">วัตถุดิบคงคลัง</h2>
@@ -454,12 +512,31 @@ const InventoryOverview: React.FC = (): JSX.Element => {
           </div>
 
           {totalStockPages > 1 && (
-            <div className="mt-4 flex justify-between items-center">
-              <div className="text-sm text-gray-700">
-                แสดง <span className="font-medium">{indexOfFirstStockItem + 1}</span> ถึง <span className="font-medium">
-                  {Math.min(indexOfLastStockItem, filteredStockItems.length)}
-                </span> จาก <span className="font-medium">{filteredStockItems.length}</span> รายการ
+            <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-700">แสดง</span>
+                <select
+                  value={stockItemsPerPage}
+                  onChange={(e) => setStockItemsPerPage(Number(e.target.value))}
+                  className="border border-gray-300 rounded-md text-sm p-1"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <span className="text-sm text-gray-700">รายการ</span>
               </div>
+
+              <div className="text-sm text-gray-700">
+                แสดง <span className="font-medium">{indexOfFirstStockItem + 1}</span> ถึง{" "}
+                <span className="font-medium">
+                  {Math.min(indexOfLastStockItem, filteredStockItems.length)}
+                </span>{" "}
+                จาก <span className="font-medium">{filteredStockItems.length}</span> รายการ
+              </div>
+
               <nav className="inline-flex rounded-md shadow-sm">
                 <button
                   onClick={() => paginateStock(Math.max(1, currentStockPage - 1))}
@@ -469,18 +546,58 @@ const InventoryOverview: React.FC = (): JSX.Element => {
                 >
                   ก่อนหน้า
                 </button>
-                {Array.from({ length: totalStockPages }, (_, i) => i + 1).map((number) => (
-                  <button
-                    key={number}
-                    onClick={() => paginateStock(number)}
-                    className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentStockPage === number
-                      ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                  >
-                    {number}
-                  </button>
-                ))}
+
+                {currentStockPage > 3 && (
+                  <>
+                    <button
+                      onClick={() => paginateStock(1)}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    >
+                      1
+                    </button>
+                    {currentStockPage > 4 && (
+                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700">
+                        ...
+                      </span>
+                    )}
+                  </>
+                )}
+
+                {Array.from({ length: totalStockPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    if (page === 1 || page === totalStockPages) return true;
+                    if (page >= currentStockPage - 1 && page <= currentStockPage + 1) return true;
+                    return false;
+                  })
+                  .map((number) => (
+                    <button
+                      key={number}
+                      onClick={() => paginateStock(number)}
+                      className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentStockPage === number
+                        ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                      {number}
+                    </button>
+                  ))}
+
+                {currentStockPage < totalStockPages - 2 && (
+                  <>
+                    {currentStockPage < totalStockPages - 3 && (
+                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700">
+                        ...
+                      </span>
+                    )}
+                    <button
+                      onClick={() => paginateStock(totalStockPages)}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    >
+                      {totalStockPages}
+                    </button>
+                  </>
+                )}
+
                 <button
                   onClick={() => paginateStock(Math.min(totalStockPages, currentStockPage + 1))}
                   disabled={currentStockPage === totalStockPages}
@@ -533,7 +650,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
                   {isIngredientDropdownOpen && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                       {stockItems
-                        .filter(item => 
+                        .filter(item =>
                           item.name.toLowerCase().includes((movementFilter.ingredientSearch || '').toLowerCase())
                         )
                         .sort((a, b) => a.name.localeCompare(b.name, 'th'))
@@ -553,13 +670,13 @@ const InventoryOverview: React.FC = (): JSX.Element => {
                             {item.name}
                           </div>
                         ))}
-                      {stockItems.filter(item => 
+                      {stockItems.filter(item =>
                         item.name.toLowerCase().includes((movementFilter.ingredientSearch || '').toLowerCase())
                       ).length === 0 && (
-                        <div className="px-4 py-2 text-gray-500">
-                          ไม่พบข้อมูล
-                        </div>
-                      )}
+                          <div className="px-4 py-2 text-gray-500">
+                            ไม่พบข้อมูล
+                          </div>
+                        )}
                     </div>
                   )}
                 </div>
@@ -660,11 +777,10 @@ const InventoryOverview: React.FC = (): JSX.Element => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            movement.type === 'IMPORT'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${movement.type === 'IMPORT'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                            }`}
                         >
                           {movement.type === 'IMPORT' ? 'นำเข้า' : 'นำออก'}
                         </span>
@@ -742,7 +858,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
                 >
                   ก่อนหน้า
                 </button>
-                
+
                 {currentMovementPage > 3 && (
                   <>
                     <button
@@ -774,11 +890,10 @@ const InventoryOverview: React.FC = (): JSX.Element => {
                       )}
                       <button
                         onClick={() => paginateMovements(number)}
-                        className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
-                          currentMovementPage === number
-                            ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentMovementPage === number
+                          ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
                       >
                         {number}
                       </button>
