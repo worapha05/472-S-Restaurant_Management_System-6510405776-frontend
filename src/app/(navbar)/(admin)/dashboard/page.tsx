@@ -154,6 +154,16 @@ export default function FinancialDashboardPage() {
     }));
   }, [orders]);
 
+  function mapOrderTypeToThai(type : any) {
+    const translations = {
+      'DINE_IN': 'กินที่ร้าน',
+      'TAKEAWAY': 'กลับบ้าน', 
+      'DELIVERY': 'Delivery'
+    };
+    
+    return translations[type] || type;
+  }
+
   // Colors for charts
   const FINANCIAL_COLORS = ['#4E54E7', '#A91D3A', '#1DA936'];
   const ORDER_TYPE_COLORS = ['#262626', '#4E54E7', '#1DA936', '#808080', '#4D4D4D'];
@@ -180,20 +190,14 @@ export default function FinancialDashboardPage() {
   };
 
   // Custom tooltip formatter for order type pie
-  const orderTypeTooltip = ({ active, payload }: any) => {
+  const orderTypeTooltip = ({ active, payload } : any) => {
     if (active && payload && payload.length) {
+      const type = payload[0].name;
+      const value = payload[0].value;
       return (
-        <div className="bg-white p-4 border border-searchBox rounded-lg shadow-sm">
-          <p className="font-medium">{payload[0].name}</p>
-          <p className="text-black">
-            ฿{payload[0].value.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}
-          </p>
-          <p className="text-xs text-secondText">
-            {((payload[0].value / summaryStats.totalIncome) * 100).toFixed(1)}% ของรายรับ
-          </p>
+        <div className="bg-white p-2 border border-gray-200 rounded shadow-sm">
+          <p className="font-medium">{type}</p>
+          <p>{value.toLocaleString()} บาท</p>
         </div>
       );
     }
@@ -323,7 +327,11 @@ export default function FinancialDashboardPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={orderTypePieData}
+                          data={orderTypePieData.map(item => ({
+                            ...item,
+                            // Transform the name before rendering
+                            name: mapOrderTypeToThai(item.name)
+                          }))}
                           cx="50%"
                           cy="50%"
                           innerRadius={70}
