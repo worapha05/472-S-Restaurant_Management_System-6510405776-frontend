@@ -20,6 +20,16 @@ const FoodDescription = ({ food, onClose }: { food: Food; onClose: () => void })
         setQuantity(prev => prev > 1 ? prev - 1 : 1);
     };
 
+    const formatFoodCategory = (category: string) => {
+        switch (category.toUpperCase()) {
+            case 'ALL': return 'ทั้งหมด';
+            case 'MAIN COURSE': return 'จานหลัก';
+            case 'DESSERT': return 'ของหวาน';
+            case 'BEVERAGE': return 'เครื่องดื่ม';
+            default: return category;
+        }
+    };
+
     const addToCart = () => {
         // Add the item to the cart
         const cart = JSON.parse(localStorage.getItem("cart") || "[]") as CartList[];
@@ -37,7 +47,7 @@ const FoodDescription = ({ food, onClose }: { food: Food; onClose: () => void })
         }
 
         localStorage.setItem("cart", JSON.stringify(cart));
-        alert(`Added ${quantity} ${food.name} to cart!`);
+        alert(`เพิ่ม ${food.name} จำนวน ${quantity} ชิ้น ลงตะกร้าสำเร็จ!`);
     };
 
     return (
@@ -76,6 +86,15 @@ const FoodDescription = ({ food, onClose }: { food: Food; onClose: () => void })
                 >
                     {food.name}
                 </motion.h2>
+
+                <motion.h3
+                    className="font-light mb-4 text-center text-secondary"
+                    initial={{ opacity: 0, y: 0 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    {formatFoodCategory(food.category)}
+                </motion.h3>
 
                 <motion.p
                     className="text-gray-600 text-sm text-center mb-8 px-4 leading-relaxed"
@@ -136,7 +155,7 @@ const FoodDescription = ({ food, onClose }: { food: Food; onClose: () => void })
                                 d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2s-.9-2-2-2M1 2v2h2l3.6 7.59l-1.35 2.45c-.16.28-.25.61-.25.96c0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12l.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2s2-.9 2-2s-.9-2-2-2"
                             ></path>
                         </svg>
-                        Add to Cart
+                        เพิ่มเข้าตะกร้า
                     </button>
                 </motion.div>
             </motion.div>

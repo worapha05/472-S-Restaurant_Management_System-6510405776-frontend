@@ -29,7 +29,17 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void
         }
 
         localStorage.setItem("cart", JSON.stringify(cart));
-        alert(`Added ${menu.name} to cart!`);
+        alert(`เพิ่ม ${menu.name} จำนวน 1 ชิ้น ลงตะกร้าสำเร็จ!`);
+    };
+
+    const formatFoodCategory = (category: string) => {
+        switch (category.toUpperCase()) {
+            case 'ALL': return 'ทั้งหมด';
+            case 'MAIN COURSE': return 'จานหลัก';
+            case 'DESSERT': return 'ของหวาน';
+            case 'BEVERAGE': return 'เครื่องดื่ม';
+            default: return category;
+        }
     };
 
     return (
@@ -42,14 +52,10 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void
                 />
                 <div className="absolute top-4 left-4">
                     <span className="text-xs tracking-wider text-gray-600">
-                        {menu.category.toUpperCase()}
+                        {formatFoodCategory(menu.category)}
                     </span>
                 </div>
-                <div className="absolute bottom-4 right-4">
-                    <span className="text-xs tracking-wider text-gray-600">
-                        {menu.status.toUpperCase()}
-                    </span>
-                </div>
+                
             </div>
             <div className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{menu.name}</h3>
@@ -59,7 +65,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void
                     onClick={onSelectFood}
                     type="button"
                 >
-                    SEE MORE DETAILS
+                    ดูรายละเอียด
                     <svg
                         className="w-4 h-4 ml-1"
                         fill="none"
@@ -83,7 +89,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void
                         onClick={addToCart}
                         type="button"
                     >
-                        ADD TO CART
+                        เพิ่มเข้าตะกร้า
                     </button>
                 </div>
             </div>

@@ -87,6 +87,16 @@ export default function MenuPage() {
         menuGridRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const formatFoodCategory = (category: string) => {
+        switch (category.toUpperCase()) {
+            case 'ALL': return 'ทั้งหมด';
+            case 'MAIN COURSE': return 'จานหลัก';
+            case 'DESSERT': return 'ของหวาน';
+            case 'BEVERAGE': return 'เครื่องดื่ม';
+            default: return category;
+        }
+    };
+
     function selectFood(foodId: number) {
         // Find the complete food object from the menuItems array using the ID
         const foundFood = menuItems.find(item => item.id === foodId);
@@ -108,7 +118,7 @@ export default function MenuPage() {
 
     return (
         <>
-            <div className="flex flex-row w-screen h-[calc(100vh-64px)] overflow-x-hidden relative">
+            <div className="flex flex-row min-h-2xl max-h-screen w-screen h-[calc(100vh-64px)] overflow-x-hidden relative">
                 <div className={`transition-all duration-300 ease-in-out ${showDescription ? 'w-3/4' : 'w-screen'
                     } px-16`}>
                     {/* Header and nav content */}
@@ -135,7 +145,7 @@ export default function MenuPage() {
                                         : 'text-gray-600 hover:text-gray-900 border-transparent hover:border-black'
                                         }`}
                                 >
-                                    {category}
+                                    {formatFoodCategory(category)}
                                 </Link>
                             ))}
                         </nav>

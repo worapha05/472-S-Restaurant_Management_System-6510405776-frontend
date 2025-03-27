@@ -18,13 +18,6 @@ interface OrderType {
     value: 'DELIVERY' | 'PICKUP' | 'DINE_IN';
 }
 
-interface Table {
-    id: number;
-    number: string;
-    capacity: number;
-    status: string;
-}
-
 const paymentMethods: PaymentMethod[] = [
     { id: 1, name: "เงินสด", value: "CASH" },
     // { id: 2, name: "QR Code", value: "QRCODE" },
@@ -242,21 +235,7 @@ export default function CheckoutPage(): JSX.Element {
                     }),
                 });
             }
-
-            // Update table status if DINE_IN
-            if (selectedOrderType?.value === "DINE_IN" && selectedTable) {
-                await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/tables/${selectedTable.id}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'Authorization': `Bearer ${session?.user?.accessToken}`,
-                    },
-                    body: JSON.stringify({
-                        status: "OCCUPIED"
-                    }),
-                });
-            }
-
+            
             localStorage.removeItem("cart");
             orderId = data.data.id;
             

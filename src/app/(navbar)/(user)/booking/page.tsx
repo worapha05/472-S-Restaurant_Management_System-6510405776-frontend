@@ -33,7 +33,8 @@ export default function ShowTimeSlots() {
                 throw new Error('Failed to fetch data');
             }
             const resJson = await res.json();
-            return resJson.data || [];
+            const availableTables = resJson.data.filter((table: Table) => table.status === 'AVAILABLE');
+            return availableTables;
         } catch (error) {
             console.error("Error fetching tables:", error);
             return [];

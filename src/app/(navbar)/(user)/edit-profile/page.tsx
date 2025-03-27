@@ -333,7 +333,7 @@ export default function EditProfilePage() {
                   {isSaving ? 'กำลังบันทึก...' : 'บันทึก'}
                 </button>
                 <Link
-                  href="/dashboard"
+                  href="/profile"
                   className="py-2 px-4 border border-searchBox text-primary hover:bg-searchBox rounded-md transition-colors text-center"
                 >
                   ยกเลิก
