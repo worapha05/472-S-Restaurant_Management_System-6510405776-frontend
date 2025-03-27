@@ -396,13 +396,6 @@ const InventoryOverview: React.FC = (): JSX.Element => {
         <div className='flex justify-between p-2 my-2'>
           <h1 className="text-3xl font-bold text-gray-900 mb-6">ระบบจัดการวัตถุดิบ</h1>
 
-<<<<<<<< HEAD:src/app/(navbar)/(stock)/inventory-logs/page.tsx
-            <a className="bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg flex items-center"
-                href="/create-inventory-logs">
-                <span className="mr-2">+</span>
-                เพิ่มการการรายการ
-            </a>
-========
           <Link
             href="/create-inventory-logs"
             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded-lg transition-colors duration-300 ease-in-out shadow-md"
@@ -412,7 +405,6 @@ const InventoryOverview: React.FC = (): JSX.Element => {
             </svg>
             <span className="text-base font-semibold">เพิ่มประวัติการนำเข้า/ออกของวัตถุดิบ</span>
           </Link>
->>>>>>>> feature/stock-feature:src/app/(navbar)/(staff)/inventory-logs/page.tsx
         </div>
 
         <div className="bg-white shadow rounded-lg p-6 mb-6">

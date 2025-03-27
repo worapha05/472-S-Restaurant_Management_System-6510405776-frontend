@@ -1,99 +1,13 @@
-// app/orders/[id]/page.tsx
+'use client';
+
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { notFound, useRouter } from 'next/navigation';
+import { useEffect, useState, use } from 'react';
+import { useSession } from 'next-auth/react';
 import OrderActions from '@/components/Order/OrderActions';
 import OrderStatusHistory from '@/components/Order/OrderStatusHistory';
-
-// Type definitions
-interface OrderItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  description?: string;
-}
-
-interface OrderList {
-  id: number;
-  quantity: number;
-  price: number;
-  description?: string;
-  food: {
-    name: string;
-  };
-}
-
-interface Order {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  type: string;
-  table_id: number | null;
-  status: string;
-  payment_method: string;
-  sum_price: number;
-  address: string | null;
-  accept: string | null;
-  user_id: number;
-  items?: OrderItem[]; // Order items if available in your API
-  order_lists: OrderList[];
-  user?: {
-    name: string;
-    phone_number: string;
-  };
-}
-
-// Loading component
-function OrderDetailLoading() {
-  return (
-    <div className="w-full max-w-5xl animate-pulse">
-      <div className="bg-white rounded-xl p-6 mb-4">
-        <div className="h-8 bg-neutral-100 rounded w-1/3 mb-4"></div>
-        <div className="h-4 bg-neutral-100 rounded w-1/2 mb-2"></div>
-        <div className="h-4 bg-neutral-100 rounded w-1/4"></div>
-      </div>
-      <div className="bg-white rounded-xl p-6 mb-4">
-        <div className="h-6 bg-neutral-100 rounded w-1/4 mb-4"></div>
-        <div className="grid grid-cols-12 gap-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="col-span-12">
-              <div className="h-16 bg-neutral-100 rounded"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Function to get a single order by ID
-async function getOrderById(id: string) {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/orders/${id}`);
-
-    if (!res.ok) {
-      if (res.status === 404) {
-        return null;
-      }
-      throw new Error('Failed to fetch order data');
-    }
-
-    const resJson = await res.json();
-    return resJson.data || null;
-  } catch (error) {
-    console.error("Error fetching order details:", error);
-    return null;
-  }
-}
-
-// Sample order items (replace with actual API data if available)
-const defaultItems: OrderItem[] = [
-  { id: 1, name: 'ข้าวผัดกระเพรา', quantity: 2, price: 120, description: 'เผ็ดน้อย' },
-  { id: 2, name: 'ส้มตำไทย', quantity: 1, price: 80, description: 'ไม่ใส่ปลาร้า' },
-  { id: 3, name: 'น้ำเปล่า', quantity: 3, price: 45 }
-];
+import Loading from '@/components/Loading';
+import { User } from '@/interfaces/User';
 
 // Format date for display
 function formatDate(dateString: string) {
@@ -130,13 +44,15 @@ function getStatusColor(status: string): string {
 }
 
 // Order detail content component
-function OrderDetail({ order }: { order: Order }) {
-  // Use sample items if no items in order data
-  const orderItems = order.order_lists || defaultItems;
+function OrderDetail({ order, userData }: { order: Order, userData: User | null }) {
+  // Use order_lists from API data
+  const orderItems = order.order_lists || [];
 
-  // Calculate subtotal and tax (assuming 7% VAT)
+  // Calculate subtotal
   const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  // const tax = subtotal * 0.07;
+
+  // Determine which user data to display (from separate user API or from order)
+  const displayUser = userData;
 
   return (
     <div className="w-full max-w-5xl">
@@ -151,19 +67,6 @@ function OrderDetail({ order }: { order: Order }) {
           </svg>
           กลับไปยังรายการคำสั่งซื้อ
         </Link>
-
-        {/* <div className="flex gap-2">
-          <button className="bg-white hover:bg-neutral-100 px-4 py-2 rounded-lg border border-neutral-200 flex items-center">
-            <span className="material-symbols-outlined mr-2">print</span>
-            พิมพ์
-          </button>
-          {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
-            <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center">
-              <span className="material-symbols-outlined mr-2">edit</span>
-              แก้ไข
-            </button>
-          )}
-        </div> */}
       </div>
 
       {/* Order Status Card */}
@@ -205,11 +108,15 @@ function OrderDetail({ order }: { order: Order }) {
               </div>
             )}
 
-            {order.user && (
+            {displayUser && (
               <div className="col-span-1 md:col-span-3">
                 <h3 className="text-sm font-medium text-neutral-500 mb-1">ข้อมูลลูกค้า</h3>
-                <p>{order.user.name}</p>
-                <p>TEL. {order.user.phone_number}</p>
+                <p>{displayUser.name}</p>
+                <p>TEL. {displayUser.phone_number}</p>
+                {userData?.email && <p>Email: {userData.email}</p>}
+                {userData?.address && order.type !== 'DELIVERY' && (
+                  <p className="whitespace-pre-line">ที่อยู่: {userData.address}</p>
+                )}
               </div>
             )}
           </div>
@@ -287,22 +194,149 @@ function OrderDetail({ order }: { order: Order }) {
   );
 }
 
+// Error component
+function OrderError({ message, retry }: { message: string, retry: () => void }) {
+  return (
+    <div className="w-full max-w-5xl">
+      <div className="bg-white rounded-xl p-6 text-center">
+        <div className="text-red-500 text-5xl mb-4">⚠️</div>
+        <h2 className="text-xl font-bold mb-2">เกิดข้อผิดพลาด</h2>
+        <p className="text-neutral-600 mb-4">{message}</p>
+        <button 
+          onClick={retry}
+          className="inline-block bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
+        >
+          ลองใหม่
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Main order detail page component
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
-  const order = await getOrderById(params.id);
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap params using React.use()
+  const unwrappedParams = use(params);
+  const orderId = unwrappedParams.id;
+  
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  console.log('Fetched order:', order);
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
 
+  useEffect(() => {
+    // Fetch order when session is authenticated
+    if (status === 'authenticated' && session?.user?.accessToken) {
+      fetchOrder();
+    }
+  }, [status, session, orderId]);
 
-  if (!order) {
-    notFound();
+  // Fetch user data when we have the order
+  useEffect(() => {
+    if (order && order.user_id && session?.user?.accessToken) {
+      fetchUserData(order.user_id);
+    }
+  }, [order, session]);
+
+  async function fetchOrder() {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/orders/${orderId}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.user?.accessToken}`,
+        }
+      });
+      
+      if (!res.ok) {
+        if (res.status === 404) {
+          router.push('/404');
+          return;
+        }
+        throw new Error('ไม่สามารถโหลดข้อมูลออเดอร์ได้');
+      }
+      
+      const resJson = await res.json();
+      console.log("Fetched Order:", resJson);
+      
+      if (!resJson.data) {
+        throw new Error('ไม่พบข้อมูลออเดอร์');
+      }
+      
+      setOrder(resJson.data);
+    } catch (err: any) {
+      console.error("Error fetching order:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
+  async function fetchUserData(userId: number) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.user?.accessToken}`,
+        }
+      });
+      
+      if (!res.ok) {
+        console.warn(`Could not fetch user data for user ID ${userId}. Using order user data instead.`);
+        return; // We'll fall back to the user data included in the order
+      }
+      
+      const resJson = await res.json();
+      console.log("Fetched User Data:", resJson);
+      
+      if (resJson.data) {
+        setUserData(resJson.data);
+      }
+    } catch (err) {
+      console.warn("Error fetching user data:", err);
+      // No need to show an error message, we'll fall back to the user data included in the order
+    }
+  }
+
+  // Show loading state
+  if (loading || status === 'loading') {
+    return (
+      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+        <p className="font-bold text-3xl w-full max-w-5xl py-6">รายละเอียดคำสั่งซื้อ</p>
+        <Loading message="กำลังโหลดข้อมูลออเดอร์..." />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+        <p className="font-bold text-3xl w-full max-w-5xl py-6">รายละเอียดคำสั่งซื้อ</p>
+        <OrderError message={error} retry={fetchOrder} />
+      </div>
+    );
+  }
+
+  // Show 404 if order not found
+  if (!order) {
+    return notFound();
+  }
+
+  // Show order when data is loaded
   return (
     <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
-      <Suspense fallback={<OrderDetailLoading />}>
-        <OrderDetail order={order} />
-      </Suspense>
+      <p className="font-bold text-3xl w-full max-w-5xl py-6">รายละเอียดคำสั่งซื้อ</p>
+      <OrderDetail order={order} userData={userData} />
     </div>
   );
 }

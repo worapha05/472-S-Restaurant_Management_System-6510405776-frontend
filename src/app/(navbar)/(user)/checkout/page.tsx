@@ -123,6 +123,7 @@ export default function CheckoutPage() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        'Authorization': `Bearer ${session?.user?.accessToken}`,
                     },
                     body: JSON.stringify({
                         order_id: data.data.id,

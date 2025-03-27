@@ -11,4 +11,5 @@ interface Order {
     address: string | null;
     accept: string | null;
     user_id: number;
+    order_lists: OrderList[];
 }
