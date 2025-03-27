@@ -45,6 +45,18 @@ function getStatusColor(status: string): string {
 
 // Order detail content component
 function OrderDetail({ order, userData }: { order: Order, userData: User | null }) {
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  
+  // Get appropriate back link based on role
+  const getBackLink = (): string => {
+    if (userRole === 'ADMIN' || userRole === 'STAFF') {
+      return '/orders';
+    } else {
+      return '/profile?section=orders';
+    }
+  };
+  
   // Use order_lists from API data
   const orderItems = order.order_lists || [];
 
@@ -59,7 +71,7 @@ function OrderDetail({ order, userData }: { order: Order, userData: User | null 
       {/* Header with back button and actions */}
       <div className="flex justify-between items-center mb-6">
         <Link
-          href="/profile?section=orders"
+          href={getBackLink()}
           className="flex flex-row items-center gap-3 text-primary-600 hover:text-primary-700"
         >
           <svg width="1.5rem" height="1.5rem" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -189,6 +201,7 @@ function OrderDetail({ order, userData }: { order: Order, userData: User | null 
         </div>
       </div>
 
+      {/* Only show OrderActions for staff and admin */}
       <OrderActions orderId={order.id} status={order.status} />
     </div>
   );
@@ -334,7 +347,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   // Show order when data is loaded
   return (
-    <div className="flex flex-col items-center justify-center w-full px-4 py-6 bg-neutral-50 min-h-screen">
+    <div className="flex flex-col items-center justify-center w-full px-4 py-6 min-h-screen">
       <p className="font-bold text-3xl w-full max-w-5xl py-6">รายละเอียดคำสั่งซื้อ</p>
       <OrderDetail order={order} userData={userData} />
     </div>

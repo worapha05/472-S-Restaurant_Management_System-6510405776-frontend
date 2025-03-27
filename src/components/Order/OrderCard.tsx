@@ -3,13 +3,14 @@
 import Link from 'next/link';
 
 export default function OrderCard({ order }: { order: Order }) {
+    // Get appropriate status color based on status
     const getStatusColor = (status: string): string => {
         switch (status.toUpperCase()) {
             case 'PENDING': return 'bg-orange-100 text-orange-700';
-            case 'IN_PROGRESS': return 'bg-primary-100 text-primary-700';
-            case 'COMPLETED': return 'bg-green-100 text-green-700';
-            case 'CANCELLED': return 'bg-red-100 text-red-700';
-            default: return 'bg-gray-100 text-gray-700';
+            case 'IN_PROGRESS': return 'bg-inputFieldFocus bg-opacity-10 text-inputFieldFocus';
+            case 'COMPLETED': return 'bg-acceptGreen bg-opacity-10 text-acceptGreen';
+            case 'CANCELLED': return 'bg-cancelRed bg-opacity-10 text-cancelRed';
+            default: return 'bg-secondary bg-opacity-10 text-secondary';
         }
     };
 
@@ -25,21 +26,6 @@ export default function OrderCard({ order }: { order: Order }) {
         });
     };
 
-    // Format accept time if present
-    const formatAcceptTime = (acceptTime: string | null) => {
-        if (!acceptTime) return 'ไม่มีข้อมูล';
-        
-        const date = new Date(acceptTime);
-        return date.toLocaleString('th-TH', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    };
-
     // Format payment method for display
     const formatPaymentMethod = (method: string) => {
         switch (method) {
@@ -51,99 +37,166 @@ export default function OrderCard({ order }: { order: Order }) {
         }
     };
 
+    // Format order type
+    const formatOrderType = (type: string) => {
+        switch (type) {
+            case 'DINE_IN': return 'ทานที่ร้าน';
+            case 'TAKE_AWAY': return 'รับกลับบ้าน';
+            case 'DELIVERY': return 'จัดส่ง';
+            default: return type;
+        }
+    };
+
+    // Get order type icon
+    const getOrderTypeIcon = (type: string) => {
+        switch (type) {
+            case 'DINE_IN':
+                return (
+                    <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                );
+            case 'TAKE_AWAY':
+                return (
+                    <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                );
+            case 'DELIVERY':
+                return (
+                    <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                );
+            default:
+                return (
+                    <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                );
+        }
+    };
+
     return (
         <Link href={`/orders/${order.id}`} passHref>
-            <div className="w-full bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-md transition-all">
-                {/* Header with Order ID and Status */}
-                <div className="grid grid-cols-12 bg-neutral-100 p-4 font-medium text-neutral-700">
-                    <div className="col-span-3 flex items-center">
-                        <span className="mr-2">รหัสคำสั่งซื้อ:</span>
-                        <code className="bg-accent px-2 py-0.5 rounded text-white">
-                            {order.id}
-                        </code>
-                    </div>
-                    <div className="col-span-3">
-                        <div className="flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-neutral-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M13.09 3.294c1.924.95 3.422 1.69 5.472.692a1 1 0 0 1 1.438.9v9.54a1 1 0 0 1-.562.9c-2.981 1.45-5.382.24-7.25-.701a38.739 38.739 0 0 0-.622-.31c-1.033-.497-1.887-.812-2.756-.77-.76.036-1.672.357-2.81 1.396V21a1 1 0 1 1-2 0V4.971a1 1 0 0 1 .297-.71c1.522-1.506 2.967-2.185 4.417-2.255 1.407-.068 2.653.453 3.72.967.225.108.443.216.655.32Z"/>
-                            </svg>
-                            <span>{order.table_id ? `โต๊ะที่ ${order.table_id}` : 'ไม่มีโต๊ะ'}</span>
-                        </div>
-                    </div>
-                    <div className="col-span-3 flex items-center">
-                        <div className="flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-neutral-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path fillRule="evenodd" d="M5 5a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1h1a1 1 0 0 0 1-1 1 1 0 1 1 2 0 1 1 0 0 0 1 1 2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a2 2 0 0 1 2-2ZM3 19v-7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm6.01-6a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm-10 4a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0Zm2 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" clipRule="evenodd"/>
-                            </svg>
-                            <time dateTime={order.created_at}>{formatDate(order.created_at)}</time>
-                        </div>
-                    </div>
-                    <div className="col-span-3 flex justify-end">
-                        <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(order.status)}`}>
+            <div className="group w-full bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all duration-200">
+                {/* Order ID and Date */}
+                <div className="p-4 flex justify-between border-b border-neutral-100">
+                    <div className="flex items-center">
+                        <div className="font-mono text-sm text-secondary mr-3">#{order.id}</div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                             {order.status}
-                        </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center text-sm text-secondary">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <time dateTime={order.created_at}>{formatDate(order.created_at)}</time>
                     </div>
                 </div>
 
-                {/* Main content */}
-                <div className="p-4 flex flex-col gap-3">
-                    <div className="flex justify-between items-center">
-                        <div className="flex flex-col">
-                            <span className="text-sm text-neutral-500">ประเภทคำสั่งซื้อ</span>
-                            <span className="font-medium">{order.type}</span>
+                {/* Order Details */}
+                <div className="p-4">
+                    <div className="grid grid-cols-12 gap-4">
+                        {/* Order Type and Table */}
+                        <div className="col-span-4 flex flex-col">
+                            <div className="flex items-center mb-4">
+                                <div className="bg-accent bg-opacity-10 p-2 rounded-lg mr-3">
+                                    {getOrderTypeIcon(order.type)}
+                                </div>
+                                <div>
+                                    <div className="text-xs text-secondText">ประเภทคำสั่งซื้อ</div>
+                                    <div className="font-medium text-mainText">{formatOrderType(order.type)}</div>
+                                </div>
+                            </div>
+                            
+                            {order.table_id && (
+                                <div className="flex items-center">
+                                    <div className="bg-accent bg-opacity-10 p-2 rounded-lg mr-3">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-secondText">โต๊ะ</div>
+                                        <div className="font-medium text-mainText">{order.table_id}</div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm text-neutral-500">การชำระเงิน</span>
+
+                        {/* Payment Method */}
+                        <div className="col-span-4 flex flex-col">
                             <div className="flex items-center">
-                                <svg className="w-5 h-5 mr-1 text-neutral-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M6 14h2m3 0h5M3 7v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1Z"/>
-                                </svg>
-                                <span className="font-medium">{formatPaymentMethod(order.payment_method)}</span>
+                                <div className="bg-accent bg-opacity-10 p-2 rounded-lg mr-3">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="text-xs text-secondText">การชำระเงิน</div>
+                                    <div className="font-medium text-mainText">{formatPaymentMethod(order.payment_method)}</div>
+                                </div>
+                            </div>
+
+                            {/* Delivery Address (conditional) */}
+                            {order.type === 'DELIVERY' && order.address && (
+                                <div className="mt-4">
+                                    <div className="text-xs text-secondText mb-1">ที่อยู่จัดส่ง</div>
+                                    <div className="text-sm text-mainText line-clamp-2">{order.address}</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Price and Action Buttons */}
+                        <div className="col-span-4 flex flex-col items-end justify-between">
+                            <div className="text-right">
+                                <div className="text-xs text-secondText">ยอดรวมทั้งหมด</div>
+                                <div className="text-xl font-bold text-mainText">
+                                    {new Intl.NumberFormat('th-TH', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(order.sum_price)} ฿
+                                </div>
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex space-x-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button className="bg-searchBox hover:bg-neutral-300 text-mainText p-2 rounded-lg transition-colors">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
+                                    <>
+                                        <button className="bg-acceptGreen bg-opacity-10 hover:bg-acceptGreen hover:bg-opacity-20 text-acceptGreen p-2 rounded-lg transition-colors">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </button>
+                                        <button className="bg-cancelRed bg-opacity-10 hover:bg-cancelRed hover:bg-opacity-20 text-cancelRed p-2 rounded-lg transition-colors">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
-                        <div className="flex flex-col items-end">
-                            <span className="text-sm text-neutral-500">ยอดรวมทั้งหมด</span>
-                            <span className="text-xl font-bold">
-                                {new Intl.NumberFormat('th-TH', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                }).format(order.sum_price)} ฿
-                            </span>
-                        </div>
                     </div>
-
-                    {/* Address - for DELIVERY type */}
-                    {order.type === 'DELIVERY' && order.address && (
-                        <div className="mt-2">
-                            <span className="text-sm text-neutral-500">ที่อยู่จัดส่ง</span>
-                            <p className="text-neutral-800 whitespace-pre-line">{order.address}</p>
-                        </div>
-                    )}
-
-                    {/* Accept time - if present */}
-                    {order.accept && (
-                        <div className="mt-2">
-                            <span className="text-sm text-neutral-500">เวลารับออเดอร์</span>
-                            <p>{formatAcceptTime(order.accept)}</p>
-                        </div>
-                    )}
                 </div>
 
-                {/* Footer with action buttons */}
-                <div className="bg-neutral-50 p-3 flex justify-end space-x-2 border-t border-neutral-200">
-                    <button className="p-2 rounded-full hover:bg-neutral-100 transition-colors">
-                        <span className="material-symbols-outlined text-primary-600">visibility</span>
-                    </button>
-                    {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
-                        <>
-                            <button className="p-2 rounded-full hover:bg-neutral-100 transition-colors">
-                                <span className="material-symbols-outlined text-green-600">check_circle</span>
-                            </button>
-                            <button className="p-2 rounded-full hover:bg-neutral-100 transition-colors">
-                                <span className="material-symbols-outlined text-red-600">cancel</span>
-                            </button>
-                        </>
-                    )}
+                {/* Order Items Count and Status Indicator */}
+                <div className="px-4 py-3 bg-searchBox bg-opacity-30 flex justify-end items-center border-t border-neutral-100">
+                    <div className="text-xs text-secondary">
+                        คลิกเพื่อดูรายละเอียด
+                        <svg className="w-4 h-4 inline-block ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
         </Link>

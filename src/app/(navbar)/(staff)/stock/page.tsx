@@ -83,7 +83,7 @@ export default function Inventory() {
       router.push('/login');
       return;
     }
-    if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
+    if (status === 'authenticated' && session?.user?.role === 'USER') {
       router.push('/');
     }
   }, [session, status, router]);
@@ -104,7 +104,7 @@ export default function Inventory() {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${session.user.accessToken}`
+          'Authorization': `Bearer ${session?.user.accessToken}`
         }
       });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');

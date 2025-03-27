@@ -112,7 +112,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
       router.push('/login');
       return;
     }
-    if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
+    if (status === 'authenticated' && session?.user?.role === 'USER') {
       router.push('/');
     }
   }, [session, status, router]);

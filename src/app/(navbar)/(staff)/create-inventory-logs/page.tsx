@@ -53,7 +53,7 @@ const InventoryMovementForm = () => {
       router.push('/login');
       return;
     }
-    if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
+    if (status === 'authenticated' && session?.user?.role === 'USER') {
       router.push('/');
     }
   }, [session, status, router]);

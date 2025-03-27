@@ -20,7 +20,7 @@ export default function WelcomePage() {
       const fetchUserData = async () => {
         if (status === 'authenticated' && session?.user?.id) {
           if (session.user.role === 'ADMIN') {
-            router.push('/about');
+            router.push('/dashboard');
           } else if (session.user.role === 'STAFF') {
             router.push('/orders');
           } else if (session.user.role === 'USER') {
