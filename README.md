@@ -7,7 +7,7 @@
     <a href="#-team-members">👥 Team Members</a>‎ ‎ |‎ ‎ 
     <a href="#%EF%B8%8F-installation">⚙️ Installation</a>‎ ‎ |‎ ‎ 
     <a href="#-sample-user-data">📋 Sample Data</a>‎ ‎ |‎ ‎ 
-    <a href="#-release-tag">🏷️ Release Tag</a>
+    <a href="#%EF%B8%8F-release-tag">🏷️ Release Tag</a>
 </p>
 
 ---
@@ -41,9 +41,9 @@ cd omnidine-frontend
 ```env
 NEXT_PUBLIC_SERVER_API_URL=http://omnidine-backend-laravel.test-1   # for server components
 NEXT_PUBLIC_CLIENT_API_URL=http://localhost                         # for client components
-NEXT_PUBLIC_S3_URL=http://localhost:9000                            # 
+NEXT_PUBLIC_S3_URL=http://localhost:9000                            # for S3 image storage
 NEXTAUTH_URL=http://omnidine-backend-laravel.test-1                 # for next auth dependencies (backend)
-NEXTAUTH_SECRET=Tpx2mez1d+poHXMGLFgqhgMc00h/VhK3ro2Rh+w6whU=        # 
+NEXTAUTH_SECRET=Tpx2mez1d+poHXMGLFgqhgMc00h/VhK3ro2Rh+w6whU=        # for next auth JWT
 ```
 
 3. Executing Composer Command
