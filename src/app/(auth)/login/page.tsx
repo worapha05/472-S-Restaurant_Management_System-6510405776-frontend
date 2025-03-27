@@ -27,7 +27,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError(`Error: ${result.error}`);
       } else if (result?.ok) {
-        router.push('/dashboard');
+        router.push('/');
         router.refresh();
       } else {
         setError('Unknown authentication error');

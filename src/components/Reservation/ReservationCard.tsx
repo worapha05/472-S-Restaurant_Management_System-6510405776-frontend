@@ -1,8 +1,9 @@
 'use client';
 
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
-async function changeReservationStatus({ id, status }: { id: string; status: string }) {
+async function changeReservationStatus({ id, status, token }: { id: string; status: string, token: string }) {
     try {
         const body = {
             status: status
@@ -12,6 +13,7 @@ async function changeReservationStatus({ id, status }: { id: string; status: str
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(body),
         });
@@ -75,6 +77,9 @@ export default function ReservationCard({ reservation }: { reservation: Reservat
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const { data: session, status } = useSession();
+
+    const token = session?.user?.accessToken;
 
     // Status options
     const statusOptions = ['PENDING', 'CONFIRMED', 'CANCELLED', 'NOT_ARRIVED', 'ARRIVED'];
@@ -89,7 +94,8 @@ export default function ReservationCard({ reservation }: { reservation: Reservat
         setIsUpdating(true);
         const updatedReservation = await changeReservationStatus({ 
             id: reservation.id, 
-            status: selectedStatus 
+            status: selectedStatus,
+            token: token?.toString() || '' 
         });
         setIsUpdating(false);
         setShowStatusModal(false);

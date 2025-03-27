@@ -2,22 +2,14 @@
 
 import { useState, useEffect } from "react";
 import ReservationCard from "@/components/Reservation/ReservationCard";
-
-// Server component for data fetching
-async function getData() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/reservations`);
-
-    if (!res.ok) {
-        throw new Error('Failed to fetch data');
-    }    
-    const resJson = await res.json();
-    console.log("Fetched Data:", resJson);
-    return resJson.data || [];
-}
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 // Client component for the reservations page with filtering
 export default function ReservationsPage() {
     // Fix: Initialize with proper typing
+    const { data: session, status } = useSession();
+    const router = useRouter();
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [filteredReservations, setFilteredReservations] = useState<Reservation[]>([]);
     const [loading, setLoading] = useState(true);
@@ -45,12 +37,37 @@ export default function ReservationsPage() {
         return option ? option.label : status;
     };
 
-    // Fetch reservations data
+    useEffect(() => {
+        // Redirect to login if not authenticated
+        if (status === 'unauthenticated') {
+            router.push('/login');
+        }
+    }, [status, router]);
+
+    // Fetch reservations data - only when session is authenticated
     useEffect(() => {
         async function fetchData() {
             try {
                 setLoading(true);
-                const data = await getData();
+
+                if (status !== 'authenticated' || !session?.user?.accessToken) {
+                    // Don't attempt to fetch if we don't have a session yet
+                    return;
+                }
+
+                const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/reservations`, {
+                    headers: {
+                        'Authorization': `Bearer ${session.user.accessToken}`,
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch data');
+                }    
+                const resJson = await res.json();
+                console.log("Fetched Data:", resJson);
+                const data = resJson.data || [];
+
                 setReservations(data);
                 setFilteredReservations(data);
             } catch (error) {
@@ -61,7 +78,7 @@ export default function ReservationsPage() {
         }
         
         fetchData();
-    }, []);
+    }, [session, status]);
 
     // Apply date and status filters when they change
     useEffect(() => {
@@ -159,11 +176,6 @@ export default function ReservationsPage() {
             <div className="flex flex-col gap-4 w-full max-w-5xl">
                 <div className="flex justify-between items-center w-full max-w-5xl py-12">
                     <p className="font-bold text-3xl text-mainText">รายการการจอง</p>
-                    
-                    <button className="bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg flex items-center">
-                        <span className="mr-2">+</span>
-                        เพิ่มการจอง
-                    </button>
                 </div>
 
                 {/* Filter Controls */}
@@ -260,7 +272,7 @@ export default function ReservationsPage() {
                     </div>
                 </div>
 
-                {loading ? (
+                {status === 'loading' || loading ? (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-inputFieldFocus"></div>
                     </div>

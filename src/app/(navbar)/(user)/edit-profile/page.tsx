@@ -57,7 +57,11 @@ export default function EditProfilePage() {
       if (status === 'authenticated' && session?.user?.id) {
         try {
           setIsLoading(true);
-          const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/users/${session.user.id}`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.accessToken}`,
+            }
+          });
 
           if (!response.ok) {
             throw new Error('Failed to fetch user data');
@@ -147,7 +151,7 @@ export default function EditProfilePage() {
       
       // Wait for 2 seconds to show success message before navigating
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/profile');
       }, 2000);
       
     } catch (err: any) {
@@ -172,26 +176,6 @@ export default function EditProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-background border-b border-searchBox">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex">
-              <Link href="/" className="text-2xl font-bold text-mainText">
-                MyApp
-              </Link>
-            </div>
-            <div>
-              <Link
-                href="/dashboard"
-                className="ml-4 px-4 py-2 border border-searchBox text-primary hover:bg-searchBox rounded-md transition-colors"
-              >
-                กลับสู่โปรไฟล์
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
