@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface OrderActionsProps {
     orderId: number;
@@ -9,6 +10,7 @@ interface OrderActionsProps {
 
 export default function OrderActions({ orderId, status }: OrderActionsProps) {
     const router = useRouter();
+    const [selectedStatus, setSelectedStatus] = useState(status);
 
     const onOrderCancel = async () => {
         try {
@@ -33,16 +35,17 @@ export default function OrderActions({ orderId, status }: OrderActionsProps) {
         }
     };
 
-    const onOrderAccept = async () => {
+    const onOrderChange = async () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/orders/${orderId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                // TODO: fix this response body
                 body: JSON.stringify({
-                    // if status is pending, set to completed, otherwise set to in progress
-                    status: status === 'PENDING' ? 'COMPLETED' : 'ERR',
+                    status: selectedStatus,
+                    accept: new Date(),
                 }),
             });
 
@@ -61,7 +64,7 @@ export default function OrderActions({ orderId, status }: OrderActionsProps) {
     }
 
     return (
-        <div className="flex justify-end gap-3 my-6">
+        <div className="flex justify-between gap-3 my-6">
             <button
                 className="bg-white hover:bg-neutral-100 px-6 py-2 rounded-lg border border-cancelRed text-cancelRed hover:text-hoverCancel flex flex-row gap-2 items-center transition-colors"
                 onClick={onOrderCancel}
@@ -71,15 +74,27 @@ export default function OrderActions({ orderId, status }: OrderActionsProps) {
                 </svg>
                 ยกเลิกออเดอร์
             </button>
-            <button
-                className="bg-acceptGreen hover:bg-hoverAccept text-white px-6 py-2 rounded-lg flex flex-row gap-2 items-center transition-colors"
-                onClick={onOrderAccept}
-            >
-                <svg fill="#FFFFFF" width="1.3rem" height="1.3rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path id="accept" d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z" transform="translate(-996 -96)" />
-                </svg>
-                {status === 'PENDING' ? 'รับออเดอร์' : 'เสร็จสิ้นออเดอร์'}
-            </button>
+
+            <div className="flex flex-row gap-2">
+                {/* dropdown to choose status from */}
+                <select
+                    className="block w-fit h-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                >
+                    <option value="IN_PROGRESS">กำลังดำเนินการ</option>
+                    <option value="COMPLETED">เสร็จสิ้น</option>
+                </select>
+                <button
+                    className="bg-acceptGreen hover:bg-hoverAccept text-white px-6 py-2 rounded-lg flex flex-row gap-2 items-center transition-colors"
+                    onClick={onOrderChange}
+                >
+                    <svg fill="#FFFFFF" width="1.3rem" height="1.3rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path id="accept" d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z" transform="translate(-996 -96)" />
+                    </svg>
+                    ยืนยันการเปลี่ยนสถานะ
+                </button>
+            </div>
         </div>
     );
 }
