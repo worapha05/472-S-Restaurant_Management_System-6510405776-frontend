@@ -27,7 +27,7 @@
 ## ⚙️ Installation
 ### Requirements
 - Windows 10 or Windows 11 (Latest Version) with Hyper-V function enabled
-- <a href="https://www.java.com/en/">Docker Desktop</a>
+- <a href="https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe?utm_source=docker&utm_medium=webreferral&utm_campaign=dd-smartbutton&utm_location=module">Docker Desktop</a>
 - <a href="https://ubuntu.com/desktop/wsl">WSL Ubuntu (WSL2)</a> (For Windows)
 
 1. Clone the project
