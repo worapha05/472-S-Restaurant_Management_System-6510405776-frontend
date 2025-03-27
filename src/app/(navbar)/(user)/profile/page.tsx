@@ -145,6 +145,15 @@ export default function ProfilePage() {
     );
   }
 
+  const formatUserRole = (role: string) => {
+    switch (role.toUpperCase()) {
+        case 'ADMIN': return 'ผู้ดูแลระบบ';
+        case 'STAFF': return 'พนักงาน';
+        case 'USER': return 'ผู้ใช้';
+        default: return role;
+    }
+};
+
   const renderProfileSection = () => {
     return (
       <div className="bg-background shadow-sm rounded-lg p-6 border border-searchBox">
@@ -186,7 +195,7 @@ export default function ProfilePage() {
           
           <div>
             <p className="text-secondText mb-1">ประเภทผู้ใช้</p>
-            <p className="text-mainText font-medium capitalize">{userData.role}</p>
+            <p className="text-mainText font-medium capitalize">{formatUserRole(userData.role)}</p>
           </div>
           
           <div>
