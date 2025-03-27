@@ -28,7 +28,3 @@ docker compose up -d
 ## จากนั้นลองเข้าเว็บตามนี้
 
 ### http://localhost:7070/
-
-### http://localhost:7070/hello
-
-### http://localhost:7070/api
