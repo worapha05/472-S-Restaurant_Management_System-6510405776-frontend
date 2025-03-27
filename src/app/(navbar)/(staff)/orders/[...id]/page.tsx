@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import OrderActions from '@/components/Order/OrderActions';
+import OrderStatusHistory from '@/components/Order/OrderStatusHistory';
 
 // Type definitions
 interface OrderItem {
@@ -126,54 +127,6 @@ function getStatusColor(status: string): string {
     case 'CANCELLED': return 'bg-red-100 text-red-700';
     default: return 'bg-gray-100 text-gray-700';
   }
-}
-
-// Order status history component
-function OrderStatusHistory({ order }: { order: Order }) {
-  const statuses = [{
-    status: 'PENDING',
-    date: order.updated_at,
-    note: 'รอการยืนยัน'
-  }, {
-    status: 'STARTED',
-    date: order.created_at,
-    note: 'กำลังเตรียมอาหาร'
-  }];
-
-  // check if order is completed or cancelled, then modify values inside first array index
-  if (order.status === 'COMPLETED') {
-    statuses[0].status = 'COMPLETED';
-    statuses[0].note = 'ออเดอร์สำเร็จ';
-  } else if (order.status === 'CANCELLED') {
-    statuses[0].status = 'CANCELLED';
-    statuses[0].note = 'ออเดอร์ถูกยกเลิก';
-  }
-
-  return (
-    <div className="space-y-4">
-      {statuses.map((statusItem, index) => (
-        <div key={index} className="flex items-start">
-          <div className="mr-4 relative">
-            <div className={`w-4 h-4 rounded-full mt-1 ${getStatusColor(statusItem.status).split(' ')[0].replace('bg-', 'bg-')}`}></div>
-            {index < statuses.length - 1 && (
-              <div className="absolute top-6 bottom-0 left-2 w-0.5 -ml-px h-[175%] bg-neutral-200"></div>
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between">
-              <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(statusItem.status)}`}>
-                {statusItem.status}
-              </span>
-              <time className="text-sm text-neutral-500">
-                {formatDate(statusItem.date)}
-              </time>
-            </div>
-            <p className="mt-1 text-sm">{statusItem.note}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
 }
 
 // Order detail content component
