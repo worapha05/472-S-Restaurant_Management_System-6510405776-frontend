@@ -108,8 +108,9 @@ export default function MenuPage() {
 
     return (
         <>
-            <div className="flex flex-row justify-center w-full h-[calc(100vh-64px)] overflow-x-hidden relative">
-                <div className="w-full mx-16">
+            <div className="flex flex-row w-screen h-[calc(100vh-64px)] overflow-x-hidden relative">
+                <div className={`transition-all duration-300 ease-in-out ${showDescription ? 'w-3/4' : 'w-screen'
+                    } px-16`}>
                     {/* Header and nav content */}
                     <div className="flex items-center justify-between w-full">
                         <p className="font-bold text-3xl w-full max-w-5xl py-12">รายการอาหาร</p>
@@ -125,7 +126,7 @@ export default function MenuPage() {
                     {/* Category Navigation */}
                     <div className="w-full mb-8">
                         <nav className="flex gap-8 border-b border-gray-200">
-                            {['ALL', 'APPETIZER', 'ENTREE', 'MAIN COURSE', 'DESSERT', 'DRINKS'].map((category) => (
+                            {['ALL', 'MAIN COURSE', 'DESSERT', 'BEVERAGE'].map((category) => (
                                 <Link
                                     key={category}
                                     href={`?${new URLSearchParams({ category })}`}
@@ -141,7 +142,10 @@ export default function MenuPage() {
                     </div>
 
                     {/* Menu Grid */}
-                    <div ref={menuGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full pb-5 overflow-y-auto max-h-[calc(100vh-300px)]">
+                    <div ref={menuGridRef} className={`grid gap-6 w-full pb-5 overflow-y-auto max-h-[calc(100vh-300px)] transition-all duration-300 ${showDescription
+                        ? 'grid-cols-1 md:grid-cols-3'
+                        : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4'
+                        }`}>
                         {isLoading ? (
                             // Skeleton loading UI
                             Array(8).fill(0).map((_, index) => (
@@ -189,8 +193,13 @@ export default function MenuPage() {
                 )}
 
                 {/* Food description pane */}
-                <div className="sticky top-0.5 w-3/6 h-full -z-10">
-                    <FoodDescription food={selectedFood} />
+                <div className={`h-[calc(100vh-64px)] overflow-y-auto transition-all duration-300 ease-in-out ${showDescription ? 'w-1/4' : 'w-0'
+                    }`}>
+                    {showDescription && (
+                        <div className="sticky top-0 h-full pl-4">
+                            <FoodDescription food={selectedFood} onClose={closeDescription} />
+                        </div>
+                    )}
                 </div>
             </div>
         </>

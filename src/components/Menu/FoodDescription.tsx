@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+
 interface CartList {
     food: Food;
     description: string;
     quantity: number;
 }
 
-const FoodDescription = ({ food }: { food: Food }) => {
+const FoodDescription = ({ food, onClose }: { food: Food; onClose: () => void }) => {
     const [quantity, setQuantity] = useState(1);
 
     const increaseQuantity = () => {
@@ -40,8 +42,22 @@ const FoodDescription = ({ food }: { food: Food }) => {
 
     return (
         <div className="flex flex-col gap-6 w-full p-10 h-full right-0 sticky shadow-md bg-background">
-            <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
-                {/* image - more constrained size */}
+            <button
+                className="absolute top-6 right-10 p-2 rounded-full bg-background text-gray-500 hover:bg-hoverButton hover:text-white transition-all"
+                onClick={onClose}
+                type="button"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <motion.div
+                className="w-full max-w-2xl mx-auto flex flex-col items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+            >
                 <div className="w-full mb-6 flex justify-center">
                     <div className="w-full max-w-xs md:max-w-sm">
                         <img
@@ -52,21 +68,39 @@ const FoodDescription = ({ food }: { food: Food }) => {
                     </div>
                 </div>
 
-                {/* title */}
-                <h2 className="text-2xl font-light mb-4 text-center">{food.name}</h2>
+                <motion.h2
+                    className="text-2xl font-light mb-4 text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    {food.name}
+                </motion.h2>
 
-                {/* description */}
-                <p className="text-gray-600 text-sm text-center mb-8 px-4 leading-relaxed">
+                <motion.p
+                    className="text-gray-600 text-sm text-center mb-8 px-4 leading-relaxed"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
                     {food.description}
-                </p>
+                </motion.p>
 
-                {/* price */}
-                <div className="w-full max-w-xs mb-4">
+                <motion.div
+                    className="w-full max-w-xs mb-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                >
                     <span className="text-lg font-semibold">฿ {food.price}</span>
-                </div>
+                </motion.div>
 
-                {/* quantity selector and add to cart */}
-                <div className="flex items-center justify-between w-full max-w-xs mb-6">
+                <motion.div
+                    className="flex items-center justify-between w-full max-w-xs mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                >
                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                         <button
                             className="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -104,8 +138,8 @@ const FoodDescription = ({ food }: { food: Food }) => {
                         </svg>
                         Add to Cart
                     </button>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
     );
 }

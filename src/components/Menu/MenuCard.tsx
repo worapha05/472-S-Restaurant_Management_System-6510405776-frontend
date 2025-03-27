@@ -7,7 +7,7 @@ interface CartList {
     quantity: number;
 }
 
-const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: (food: Food) => void }) => {
+const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void }) => {
 
     const addToCart = (e: React.MouseEvent) => {
         // Prevent default form submission
@@ -56,7 +56,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: (food: Foo
 
                 <button
                     className="mt-4 text-sm text-gray-800 hover:text-gray-600 flex items-center"
-                    onClick={() => onSelectFood(menu)}
+                    onClick={onSelectFood}
                     type="button"
                 >
                     SEE MORE DETAILS
