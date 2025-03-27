@@ -166,7 +166,7 @@ export default function CreateFoodPage() {
 
   // Function to handle the image URL after upload
   const handleImageUpload = (uploadedUrl: string) => {
-    const fullUrl = `${process.env.NEXT_PUBLIC_S3_URL}${uploadedUrl}`;
+    const fullUrl = `${uploadedUrl}`;
     setFormData({
       ...formData,
       image_url: fullUrl
