@@ -12,7 +12,7 @@ export default function YourPage() {
       <h1 className="text-2xl font-bold mb-4">Upload Image</h1>
       <img
         src={`${process.env.NEXT_PUBLIC_S3_URL}${photoPath}`} />
-      <StandaloneMinioUploader />
+      <StandaloneMinioUploader onImageUpload={photoPath}/>
     </div>
   );
 }

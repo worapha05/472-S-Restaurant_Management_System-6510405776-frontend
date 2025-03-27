@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface Food {
@@ -19,8 +18,11 @@ export default function FoodsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ประเภทอาหารทั้งหมด");
   const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด");
-  const categories = ["ประเภทอาหารทั้งหมด", "main course" , "dessert", "beverage"];
-  const status = ["สถานะทั้งหมด", "available", "unavailable"];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; // จำนวนรายการต่อหน้า
+
+  const categories = ["ประเภทอาหารทั้งหมด", "main course", "dessert", "beverage"];
+  const statuses = ["สถานะทั้งหมด", "available", "unavailable"];
 
   useEffect(() => {
     async function fetchData() {
@@ -48,33 +50,39 @@ export default function FoodsPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredFoodItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredFoodItems.length / itemsPerPage);
+
   return (
     <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold mb-6">เมนูอาหาร</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold mb-6">เมนูอาหาร</h1>
 
-            {/* ปุ่มเพิ่มเมนูอาหาร */}
-            <div className="mb-6">
-                <Link 
-                    href="/foods/create" 
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark transition-colors w-fit text-white font-bold"
-                >
-                    <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        strokeWidth="1.5" 
-                        stroke="currentColor" 
-                        className="size-6 text-white"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-
-                    <span className="whitespace-nowrap">เพิ่มเมนู</span>
-                </Link>
-            </div>
+        {/* Add food */}
+        <div className="mb-6">
+          <Link 
+            href="/foods/create" 
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark transition-colors w-fit text-white font-bold"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              strokeWidth="1.5" 
+              stroke="currentColor" 
+              className="size-6 text-white"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span className="whitespace-nowrap">เพิ่มเมนู</span>
+          </Link>
         </div>
+      </div>
 
+      {/* search */}
       <div className="mb-6 flex flex-col md:flex-row gap-4">
         <input
           type="text"
@@ -99,7 +107,7 @@ export default function FoodsPage() {
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
-          {status.map((status) => (
+          {statuses.map((status) => (
             <option key={status} value={status}>
               {status.replace("_", " ")}
             </option>
@@ -107,32 +115,32 @@ export default function FoodsPage() {
         </select>
       </div>
       
+      {/* menu */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFoodItems.length > 0 ? (
-          filteredFoodItems.map((item) => (
+        {currentItems.length > 0 ? (
+          currentItems.map((item) => (
             <div key={item.id} className="border rounded-lg overflow-hidden shadow-md">
-              <div className="relative h-48 w-full">
+              <div className="relative h-48 w-full overflow-hidden">
                 <img
                   src={item.image_url}
                   alt={item.name}
-                  className="w-full h-auto object-cover"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{item.name}</h2>
 
-                {/* แสดง category และ status */}
                 <div className="flex gap-4 mb-2">
                   <span className="text-sm text-gray-500">ประเภทอาหาร: {item.category}</span>
                 </div>
                 <div className="flex mb-4">
-                    <span
-                        className={`text-sm px-2 py-1 rounded ${
-                        item.status === "available"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                    >
+                  <span
+                    className={`text-sm px-2 py-1 rounded ${
+                      item.status === "available"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
                     {item.status}
                   </span>
                 </div>
@@ -153,6 +161,21 @@ export default function FoodsPage() {
             <p className="text-xl text-gray-500">ไม่พบรายการอาหาร ลองค้นหาใหม่อีกครั้ง!</p>
           </div>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-6">
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`mx-1 px-4 py-2 border rounded ${
+              currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );
