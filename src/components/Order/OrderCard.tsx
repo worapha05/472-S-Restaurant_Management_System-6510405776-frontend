@@ -163,7 +163,7 @@ export default function OrderCard({ order }: { order: Order }) {
                             </div>
 
                             {/* Action buttons */}
-                            <div className="flex space-x-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            {/* <div className="flex space-x-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 <button className="bg-searchBox hover:bg-neutral-300 text-mainText p-2 rounded-lg transition-colors">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -184,7 +184,7 @@ export default function OrderCard({ order }: { order: Order }) {
                                         </button>
                                     </>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

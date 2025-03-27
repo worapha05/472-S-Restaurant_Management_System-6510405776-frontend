@@ -28,7 +28,7 @@ interface FormData {
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession(); // Added update method from useSession
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -141,10 +141,25 @@ export default function EditProfilePage() {
         body: JSON.stringify(payload)
       });
 
+      // Parse the response data first
+      const data = await response.json();
+      
+      // Then check if response was ok
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || 'Failed to update profile');
       }
+
+      // Update session with new user data
+      await update({
+        ...session,
+        user: {
+          ...session.user,
+          name: formData.name,
+          username: formData.username,
+          phone_number: formData.phone_number,
+          address: formData.address,
+        }
+      });
 
       setSuccessMessage('ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว');
       window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top smoothly
@@ -157,6 +172,7 @@ export default function EditProfilePage() {
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
       console.error('Error updating profile:', err);
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to show error
     } finally {
       setIsSaving(false);
     }
