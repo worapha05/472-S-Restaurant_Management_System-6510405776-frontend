@@ -1,16 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check if user is already logged in and redirect to home page
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push('/');
+    }
+  }, [session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +47,27 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking session
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <p className="mt-4 text-primary">กำลังตรวจสอบการเข้าสู่ระบบ...</p>
+      </div>
+    );
+  }
+
+  // If already authenticated, we'll redirect in the useEffect
+  // This helps prevent flash of login form
+  if (status === 'authenticated') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <p className="mt-4 text-primary">กำลังนำคุณไปยังหน้าหลัก...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">

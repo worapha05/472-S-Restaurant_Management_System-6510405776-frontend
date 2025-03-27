@@ -3,7 +3,7 @@ import Link from "next/link";
 async function getData(id: string) {
     console.log("Fetching food with ID:", id);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/foods/${id}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_API_URL}/api/foods/${id}`);
 
     if (!res.ok) {
         throw new Error('Failed to fetch data');

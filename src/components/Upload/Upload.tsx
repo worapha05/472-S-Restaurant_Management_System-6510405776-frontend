@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface UploadResponse {
   success: boolean;
@@ -10,12 +11,13 @@ interface UploadResponse {
 }
 
 const StandaloneMinioUploader = ({ onImageUpload }: { onImageUpload: (uploadedUrl: string) => void }) => {
+  const { data: session } = useSession();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null); // state สำหรับข้อความสำเร็จ
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -44,6 +46,12 @@ const StandaloneMinioUploader = ({ onImageUpload }: { onImageUpload: (uploadedUr
 
   const handleUpload = async () => {
     if (!selectedFile) return;
+    
+    // Check if user is authenticated with a token
+    if (!session?.user?.accessToken) {
+      setError('You need to be logged in to upload files');
+      return;
+    }
 
     setUploading(true);
     setError(null);
@@ -52,9 +60,12 @@ const StandaloneMinioUploader = ({ onImageUpload }: { onImageUpload: (uploadedUr
       const formData = new FormData();
       formData.append('file', selectedFile);
       
-      // ส่งไฟล์ไปยังเซิร์ฟเวอร์
+      // Send the file to the server with authorization token
       const response = await fetch(`${process.env.NEXT_PUBLIC_CLIENT_API_URL}/api/upload`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.user.accessToken}`
+        },
         body: formData,
       });
 
