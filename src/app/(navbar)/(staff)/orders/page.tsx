@@ -164,15 +164,27 @@ export default function OrdersPage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
                     <h1 className="text-3xl font-bold text-mainText mb-4 md:mb-0">รายการคำสั่งซื้อ</h1>
                     
-                    <button 
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center justify-center gap-2 bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg transition-all"
-                    >
-                        <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M14.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h9.25"/>
-                        </svg>
-                        <span>{showFilters ? "ซ่อนตัวกรอง" : "แสดงตัวกรอง"}</span>
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <button 
+                            onClick={() => router.push('/menu')}
+                            className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/80 text-white px-4 py-2 rounded-lg transition-all"
+                        >
+                            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 5.757v8.486M5.757 10h8.486M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                            </svg>
+                            <span>เพิ่มรายการสั่งซื้อ</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex items-center justify-center gap-2 bg-button hover:bg-hoverButton text-white px-4 py-2 rounded-lg transition-all"
+                        >
+                            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M14.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h9.25"/>
+                            </svg>
+                            <span>{showFilters ? "ซ่อนตัวกรอง" : "แสดงตัวกรอง"}</span>
+                        </button>
+                    </div>
                 </div>
                 
                 {/* Filters Section */}

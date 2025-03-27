@@ -124,7 +124,7 @@ const InventoryOverview: React.FC = (): JSX.Element => {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${session.user.accessToken}`
+          'Authorization': `Bearer ${session?.user.accessToken}`
         }
       });
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -145,9 +145,11 @@ const InventoryOverview: React.FC = (): JSX.Element => {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${session.user.accessToken}`
+          'Authorization': `Bearer ${session?.user.accessToken}`
         }
       });
+      console.log("fetchStockEntries:", response);
+      
       if (!response.ok) throw new Error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
       const data = await response.json();
       if (data.data) {
