@@ -51,7 +51,7 @@ const MenuCard = ({ menu, onSelectFood }: { menu: Food, onSelectFood: () => void
                     className="object-cover w-full h-full"
                 />
                 <div className="absolute top-4 left-4">
-                    <span className="text-xs tracking-wider text-gray-600">
+                    <span className="text-xs tracking-wider text-gray-600 rounded-xl bg-white p-2 opacity-80">
                         {formatFoodCategory(menu.category)}
                     </span>
                 </div>
