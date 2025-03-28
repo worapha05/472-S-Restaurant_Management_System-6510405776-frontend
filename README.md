@@ -63,4 +63,4 @@ user@user.com : 123         # user account #
 </pre>
 
 ## 🏷️ Release Tag
-- Release Tag ที่เสร็จสมบูรณ์และใช้ในการนำเสนอ: <a href="https://github.com/omnidine/omnidine-frontend/releases/tag/1.0.0">1.0.0</a>
+- Release Tag ที่เสร็จสมบูรณ์และใช้ในการนำเสนอ: <a href="https://github.com/omnidine/omnidine-frontend/releases/tag/1.0.1">1.0.1</a>
