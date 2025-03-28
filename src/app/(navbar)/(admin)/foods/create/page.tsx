@@ -92,7 +92,7 @@ export default function CreateFoodPage() {
     }
 
     // Validate image URL
-    if (!formData.image_url || !formData.image_url.startsWith('http')) {
+    if (!formData.image_url) {
       newErrors.image_url = "กรุณากรอก URL รูปภาพที่ถูกต้อง";
       valid = false;
     }
