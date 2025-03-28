@@ -17,7 +17,7 @@ const NavItem = ({ href, label }: NavItemProps) => {
     return (
         <Link
             href={href}
-            className={`text-gray-600 hover:text-gray-900 ${isActive ? 'font-medium text-black' : ''}`}
+            className={`text-gray-600 hover:text-gray-900 ${isActive ? 'font-medium' : ''}`}
         >
             {label}
         </Link>
@@ -106,31 +106,23 @@ const Navbar = () => {
 
     return (
         <nav className="flex items-center justify-between px-6 py-4 bg-white shadow-sm">
-            {/* Left Section - Logo */}
-            <div className="flex-shrink-0 w-1/4">
-                <Link href={getHomePage()} className="flex items-center">
-                    <div className="mr-2">
-                        <div className="w-6 h-6 border-2 border-black rounded-full" />
-                    </div>
-                    <span className="text-xl font-semibold md:inline hidden">OmniDine</span>
-                </Link>
+            {/* Logo Section */}
+            <Link href={getHomePage()} className="flex items-center">
+                <div className="mr-2">
+                    <div className="w-6 h-6 border-2 border-black rounded-full" />
+                </div>
+                <span className="text-xl font-semibold">OmniDine</span>
+            </Link>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-8">
+                {navItems.map((item) => (
+                    <NavItem key={item.href} {...item} />
+                ))}
             </div>
 
-            {/* Center Section - Navigation Links (largest section) */}
-            <div className="flex-grow flex justify-center items-center px-4">
-                <div className="hidden md:flex space-x-8">
-                    {navItems.map((item) => (
-                        <NavItem key={item.href} {...item} />
-                    ))}
-                </div>
-                {/* Mobile center content - can add a centered title or icon here */}
-                <div className="md:hidden text-lg font-medium">
-                    OmniDine
-                </div>
-            </div>
-
-            {/* Right Section - Auth Buttons */}
-            <div className="flex-shrink-0 w-1/4 flex justify-end items-center space-x-4">
+            {/* Auth Buttons - Show different buttons based on authentication status */}
+            <div className="flex items-center space-x-4">
                 {status === 'loading' ? (
                     <div className="h-8 w-24 bg-gray-200 animate-pulse rounded-full"></div>
                 ) : session ? (
@@ -205,6 +197,79 @@ const Navbar = () => {
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
                                             การจองของฉัน
+                                        </Link>
+                                    </>
+                                )}
+                                
+                                {userRole === 'STAFF' && (
+                                    <>
+                                        <Link 
+                                            href="/orders" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            จัดการออเดอร์
+                                        </Link>
+                                        <Link 
+                                            href="/reservations" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            จัดการการจอง
+                                        </Link>
+                                        <Link 
+                                            href="/stock" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            สต๊อก
+                                        </Link>
+                                        <Link 
+                                            href="/inventory-logs" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            ประวัติเข้า-ออกสต๊อก
+                                        </Link>
+                                    </>
+                                )}
+                                
+                                {userRole === 'ADMIN' && (
+                                    <>
+                                        <Link 
+                                            href="/dashboard" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            แดชบอร์ด
+                                        </Link>
+                                        <Link 
+                                            href="/orders" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            ออเดอร์
+                                        </Link>
+                                        <Link 
+                                            href="/reservations" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            การจอง
+                                        </Link>
+                                        <Link 
+                                            href="/stock" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            สต๊อก
+                                        </Link>
+                                        <Link 
+                                            href="/inventory-logs" 
+                                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        >
+                                            ประวัติเข้า-ออกสต๊อก
                                         </Link>
                                     </>
                                 )}

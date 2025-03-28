@@ -71,7 +71,7 @@ const FoodDescription = ({ food, onClose }: { food: Food; onClose: () => void })
                 <div className="w-full mb-6 flex justify-center">
                     <div className="w-full max-w-xs md:max-w-sm">
                         <img
-                            src={food.image_url}
+                            src={`${process.env.NEXT_PUBLIC_S3_URL}/${food.image_url}`}
                             alt={food.name}
                             className="w-full h-auto aspect-square object-cover rounded-lg"
                         />
