@@ -124,7 +124,7 @@ export default function CheckoutPage(): JSX.Element {
         setSelectedOrderType(orderType);
         
         // Clear address if changing to pickup
-        if (orderType.value === "PICKUP") {
+        if (orderType.value === "TAKEAWAY") {
             setAddress("");
             setUseMockAddress(false);
         }
@@ -370,7 +370,7 @@ export default function CheckoutPage(): JSX.Element {
                                 </div>
                             )}
                             
-                            {selectedOrderType?.value === "PICKUP" && (
+                            {selectedOrderType?.value === "TAKEAWAY" && (
                                 <div className="border px-4 py-6 rounded-xl bg-gray-100">
                                     <p className="font-medium text-lg mb-2">รายละเอียดการรับอาหาร:</p>
                                     <p className="mt-2">- กรุณามารับอาหารที่ร้านภายใน 30 นาทีหลังได้รับการยืนยัน</p>
