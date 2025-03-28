@@ -38,6 +38,10 @@ cd omnidine-frontend
 ```
 
 2. Create .env file with the following content:
+```bash
+cp .env.example .env
+```
+
 ```env
 NEXT_PUBLIC_SERVER_API_URL=http://omnidine-backend-laravel.test-1   # for server components
 NEXT_PUBLIC_CLIENT_API_URL=http://localhost                         # for client components
@@ -63,4 +67,4 @@ user@user.com : 123         # user account #
 </pre>
 
 ## 🏷️ Release Tag
-- Release Tag ที่เสร็จสมบูรณ์และใช้ในการนำเสนอ: <a href="https://github.com/omnidine/omnidine-frontend/releases/tag/1.0.1">1.0.1</a>
+- Release Tag ที่เสร็จสมบูรณ์และใช้ในการนำเสนอ: <a href="https://github.com/omnidine/omnidine-frontend/releases/tag/1.0.2">1.0.2</a>
