@@ -43,11 +43,11 @@ cp .env.example .env
 ```
 
 ```env
-NEXT_PUBLIC_SERVER_API_URL=http://omnidine-backend-laravel.test-1   # for server components
-NEXT_PUBLIC_CLIENT_API_URL=http://localhost                         # for client components
-NEXT_PUBLIC_S3_URL=http://localhost:9000                            # for S3 image storage
-NEXTAUTH_URL=http://omnidine-backend-laravel.test-1                 # for next auth dependencies (backend)
-NEXTAUTH_SECRET=Tpx2mez1d+poHXMGLFgqhgMc00h/VhK3ro2Rh+w6whU=        # for next auth JWT
+NEXT_PUBLIC_SERVER_API_URL=http://472-s-restaurant_management_system-6510405776-backend-laravel.test-1   # for server components
+NEXT_PUBLIC_CLIENT_API_URL=http://localhost                                                              # for client components
+NEXT_PUBLIC_S3_URL=http://localhost:9000                                                                 # for S3 image storage
+NEXTAUTH_URL=http://472-s-restaurant_management_system-6510405776-backend-laravel.test-1                 # for next auth dependencies (backend)
+NEXTAUTH_SECRET=Tpx2mez1d+poHXMGLFgqhgMc00h/VhK3ro2Rh+w6whU=  
 ```
 
 3. Executing Composer Command

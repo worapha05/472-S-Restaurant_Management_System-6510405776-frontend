@@ -21,7 +21,7 @@ services:
 
 networks:
   omnidine:
-    name: omnidine-backend_sail
+    name: 472-s-restaurant_management_system-6510405776-backend_sail
     external: true
 
 volumes:
