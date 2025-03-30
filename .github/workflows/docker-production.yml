@@ -9,7 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4   
+           
+      # Generate version
+      - name: Generate version
+        id: version
+        run: |
+          VERSION=$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
 
       # Login to Docker Hub
       - name: Login to DockerHub
