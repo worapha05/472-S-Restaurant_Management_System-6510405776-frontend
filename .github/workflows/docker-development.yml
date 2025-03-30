@@ -1,0 +1,21 @@
+name: Next.js Development
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+env:
+  APP_NAME: "solo-project-frontend-ci"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |-
+          IMAGE_NAME="${{ env.APP_NAME }}"
+
+          docker build -t "${IMAGE_NAME}" .
